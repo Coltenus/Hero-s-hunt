@@ -1,12 +1,15 @@
 #include "rooms.h"
 #include <iostream>
 #include <raylib.hpp>
+#include "info.h"
 
 bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st, bool isBoss)
 {
 	static unsigned short action, sel;
 	static bool confirmation;
 	static Vector2 mPos;
+	static bool shouldExit;
+	shouldExit = false;
 	sel = 0;
 	action = 0;
 	while ((*h)->hp > 0)
@@ -28,47 +31,62 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 				confirmation = true;
 			}
 			BeginDrawing();
+			if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st);
 			if (IsKeyPressed(KEY_DOWN) && sel < 3)
 				sel++;
 			if (IsKeyPressed(KEY_UP) && sel > 1)
 				sel--;
-			if (mPos.x >= 40 && mPos.x <= 210
+			if (mPos.x >= 40 && mPos.x <= 220
 				&& mPos.y >= HEIGHT / 2 + 20 && mPos.y <= HEIGHT / 2 + 80) sel = 1;
-			if (mPos.x >= 40 && mPos.x <= 210
+			if (mPos.x >= 40 && mPos.x <= 220
 				&& mPos.y >= HEIGHT / 2 + 120 && mPos.y <= HEIGHT / 2 + 180) sel = 2;
-			if (mPos.x >= 40 && mPos.x <= 210
+			if (mPos.x >= 40 && mPos.x <= 220
 				&& mPos.y >= HEIGHT / 2 + 220 && mPos.y <= HEIGHT / 2 + 280) sel = 3;
 			switch (sel)
 			{
 			case 1:
-				DrawRectangle(40, HEIGHT / 2 + 20, 170, 60, YELLOW);
+				DrawRectangle(40, HEIGHT / 2 + 20, 180, 60, YELLOW);
 				break;
 			case 2:
-				DrawRectangle(40, HEIGHT / 2 + 120, 170, 60, YELLOW);
+				DrawRectangle(40, HEIGHT / 2 + 120, 180, 60, YELLOW);
 				break;
 			case 3:
-				DrawRectangle(40, HEIGHT / 2 + 220, 170, 60, YELLOW);
+				DrawRectangle(40, HEIGHT / 2 + 220, 180, 60, YELLOW);
 				break;
 			}
 			DrawRectangleLines(20, HEIGHT / 2, WIDTH - 40, HEIGHT / 2 - 20, BLACK);
 
-			DrawRectangleLines(40, HEIGHT / 2 + 20, 170, 60, BLACK);
+			DrawRectangleLines(40, HEIGHT / 2 + 20, 180, 60, BLACK);
 			DrawText((*h)->nA, 45, HEIGHT / 2 + 38, 24, BLACK);
 
-			DrawRectangleLines(40, HEIGHT / 2 + 120, 170, 60, BLACK);
+			DrawRectangleLines(40, HEIGHT / 2 + 120, 180, 60, BLACK);
 			DrawText((*h)->hA, 45, HEIGHT / 2 + 138, 24, BLACK);
 
-			DrawRectangleLines(40, HEIGHT / 2 + 220, 170, 60, BLACK);
+			DrawRectangleLines(40, HEIGHT / 2 + 220, 180, 60, BLACK);
 			DrawText((*h)->sp, 45, HEIGHT / 2 + 238, 24, BLACK);
 
 			DrawText(inf->username, 250, HEIGHT / 2 + 20, 24, BLACK);
-			DrawText(TextFormat("HP: %d/%d", (*h)->hp, (*h)->maxHP), 250, HEIGHT / 2 + 60, 24, BLACK);
-			DrawText(TextFormat("Block: %d", (*h)->block), 250, HEIGHT / 2 + 100, 24, BLACK);
-			DrawText(TextFormat("Normal attack damage: %d", (*h)->minNDMG), 250, HEIGHT / 2 + 140, 24, BLACK);
-			DrawText(TextFormat("Heavy attack damage: %d", (*h)->minHDMG), 250, HEIGHT / 2 + 180, 24, BLACK);
-			DrawText(TextFormat("Special value: %d", (*h)->spValue), 250, HEIGHT / 2 + 220, 24, BLACK);
-			DrawText(TextFormat("Evasion: %d%", (*h)->evasion), 250, HEIGHT / 2 + 260, 24, BLACK);
-			DrawText(TextFormat("Gold: %d", (*h)->gold), 250, HEIGHT / 2 + 300, 24, BLACK);
+			switch ((*sv)->charact)
+			{
+			case 1:
+				DrawText("Warrior", 250, HEIGHT / 2 + 60, 24, BLACK);
+				break;
+			case 2:
+				DrawText("Archer", 250, HEIGHT / 2 + 60, 24, BLACK);
+				break;
+			case 3:
+				DrawText("Palladin", 250, HEIGHT / 2 + 60, 24, BLACK);
+				break;
+			}
+			DrawText(TextFormat("HP: %d/%d", (*h)->hp, (*h)->maxHP), 250, HEIGHT / 2 + 100, 24, BLACK);
+			DrawText(TextFormat("Block: %d", (*h)->block), 250, HEIGHT / 2 + 140, 24, BLACK);
+			DrawText(TextFormat("Normal attack damage: %d", (*h)->minNDMG), 250, HEIGHT / 2 + 180, 24, BLACK);
+			DrawText(TextFormat("Heavy attack damage: %d", (*h)->minHDMG), 250, HEIGHT / 2 + 220, 24, BLACK);
+			DrawText(TextFormat("Special value: %d", (*h)->spValue), 250, HEIGHT / 2 + 260, 24, BLACK);
+			DrawText(TextFormat("Evasion: %d%", (*h)->evasion), 250, HEIGHT / 2 + 300, 24, BLACK);
+			if ((*h)->isUnreachable) DrawText("Is Hero unreachable?: true", 250, HEIGHT / 2 + 340, 24, BLACK);
+			else DrawText("Is Hero unreachable?: false", 250, HEIGHT / 2 + 340, 24, BLACK);
+			DrawText(TextFormat("Gold: %d", (*h)->gold), 250, HEIGHT / 2 + 380, 24, BLACK);
 
 			if(isBoss) DrawText("Boss", 1000, HEIGHT / 2 + 20, 24, BLACK);
 			else DrawText("Enemy", 1000, HEIGHT / 2 + 20, 24, BLACK);
@@ -84,8 +102,10 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 
 			ClearBackground(WHITE);
 			EndDrawing();
-			if (WindowShouldClose()) return true;
+			if (WindowShouldClose()) shouldExit = true;
+			if (shouldExit) break;
 		}
+		if (shouldExit) break;
 		switch (sel)
 		{
 		case 1:
@@ -122,18 +142,22 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 		else (*en)->Special();
 		while(!IsKeyPressed(KEY_SPACE))
 		{
+			if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st);
 			BeginDrawing();
 			DrawText("Press Space to continue", WIDTH / 2 - 185, HEIGHT / 2 - 200, 30, BLACK);
 			ClearBackground(WHITE);
 			EndDrawing();
 		}
 	}
-	return false;
+	if (shouldExit) return true;
+	else return false;
 }
 
-bool Shop(Hero** h, Save** sv, double* st)
+bool Shop(Hero** h, Save** sv, double* st, Info* inf)
 {
-	while (!IsKeyPressed(KEY_B))
+	static bool shouldExit;
+	shouldExit = false;
+	while (!IsKeyPressed(KEY_B) && !shouldExit)
 	{
 		if (GetTime() - *st >= 60)
 		{
@@ -142,6 +166,8 @@ bool Shop(Hero** h, Save** sv, double* st)
 			if ((*sv)->minutes == 60) (*sv)->hours++;
 			if ((*sv)->hours == 24) (*sv)->days++;
 		}
+		if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st);
+
 		BeginDrawing();
 		DrawRectangleLines(20, HEIGHT / 2, WIDTH - 40, HEIGHT / 2 - 20, BLACK);
 
@@ -150,20 +176,23 @@ bool Shop(Hero** h, Save** sv, double* st)
 		EndDrawing();
 		if (WindowShouldClose())
 		{
-			return true;
+			shouldExit = true;
 		}
 	}
-	return false;
+	if (shouldExit) return true;
+	else return false;
 }
 
-bool RestRoom(Hero** h, Save** sv, double* st)
+bool RestRoom(Hero** h, Save** sv, double* st, Info* inf)
 {
 	static short sel;
 	static bool confirmation;
+	static bool shouldExit;
 	static Vector2 mPos;
+	shouldExit = false;
 	confirmation = false;
 	sel = 0;
-	while (!IsKeyPressed(KEY_B))
+	while (!IsKeyPressed(KEY_B) && !shouldExit)
 	{
 		if (GetTime() - *st >= 60)
 		{
@@ -173,6 +202,8 @@ bool RestRoom(Hero** h, Save** sv, double* st)
 			if ((*sv)->hours == 24) (*sv)->days++;
 		}
 		mPos = GetMousePosition();
+		if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st);
+		if (shouldExit) break;
 		if (IsKeyPressed(KEY_ENTER)
 			|| IsMouseButtonPressed(MOUSE_BUTTON_LEFT)
 			&& (mPos.x >= WIDTH / 2 - 100 && mPos.x <= WIDTH / 2 + 100
@@ -213,8 +244,9 @@ bool RestRoom(Hero** h, Save** sv, double* st)
 
 		ClearBackground(WHITE);
 		EndDrawing();
-		if (WindowShouldClose()) return true;
+		if (WindowShouldClose()) shouldExit = true;
 	}
+	if (shouldExit) return true;
 	switch (sel)
 	{
 	case 1:

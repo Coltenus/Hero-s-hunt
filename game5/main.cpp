@@ -4,14 +4,14 @@
 #include <time.h>
 using namespace std;
 
+#include "common.h"
 #include "characters.h"
 #include "chooseRoom.h"
 
-bool OpenInfo(Info**, Save**, double*, int);
 void FillFile();
 void EnterUsername(Info**, bool*);
 int SelectionMenu(Info**, int*);
-void GameProcess(Info**, int, bool*, bool (*)(Info**, Save**, double*, int), short (*)(short*, bool*));
+void GameProcess(Info**, int, bool*, short (*)(short*, bool*));
 short SelectHero(short*, bool*);
 
 int main()
@@ -49,19 +49,19 @@ int main()
 			curSave = SelectionMenu(&inf, &sel);
 			break;
 		case 1:
-			GameProcess(&inf, 1, &shouldExit, OpenInfo, SelectHero);
+			GameProcess(&inf, 1, &shouldExit, SelectHero);
 			shouldExit = false;
 			curSave = 0;
 			sel = 0;
 			break;
 		case 2:
-			GameProcess(&inf, 2, &shouldExit, OpenInfo, SelectHero);
+			GameProcess(&inf, 2, &shouldExit, SelectHero);
 			shouldExit = false;
 			curSave = 0;
 			sel = 0;
 			break;
 		case 3:
-			GameProcess(&inf, 3, &shouldExit,OpenInfo, SelectHero);
+			GameProcess(&inf, 3, &shouldExit, SelectHero);
 			shouldExit = false;
 			curSave = 0;
 			sel = 0;
@@ -82,30 +82,6 @@ int main()
 	delete inf;
 	inf = nullptr;
 	return 0;
-}
-
-bool OpenInfo(Info** i, Save** save, double *st, int sv)
-{
-	static bool fl;
-	fl = true;
-	while (!IsKeyPressed(KEY_X) )
-	{
-		BeginDrawing();
-		DrawText(TextFormat("\t\t\t\t\t\t\t\t\t\t\t\t\tTime in game:\n%d day(s) %d hour(s) %d minute(s) %-4.2lf second(s)"
-			, (*save)->days, (*save)->hours, (*save)->minutes, GetTime() - *st)
-			, WIDTH / 2 - 320, HEIGHT / 2, 30, BLACK);
-		DrawText(TextFormat("Save %d", (*save)->order), WIDTH / 2 - 50, HEIGHT / 2 - 100, 30, BLACK);
-		DrawText(TextFormat("Username: %s", (*i)->username), WIDTH / 2 - 150, HEIGHT / 2 - 200, 30, BLACK);
-		DrawFPS(0, 0);
-		ClearBackground(WHITE);
-		EndDrawing();
-		if (WindowShouldClose())
-		{
-			fl = false;
-			return true;
-		}
-	}
-	return false;
 }
 
 void FillFile()
@@ -277,6 +253,15 @@ int SelectionMenu(Info** i, int *sel)
 			save->stats.maxHP = 100;
 			save->stats.spValue = 0;
 			save->roomNum = 0;
+			save->roomType = 0;
+			save->enemyStats.enType = 0;
+			save->enemyStats.dmgN = 0;
+			save->enemyStats.dmgH = 0;
+			save->enemyStats.hp = 0;
+			save->enemyStats.maxHP = 0;
+			save->enemyStats.modAt = 0;
+			save->enemyStats.rewGold = 0;
+			save->enemyStats.spV = 0;
 			fwrite(save, sizeof(Save), 1, f);
 			delete save;
 			save = NULL;
@@ -289,7 +274,7 @@ int SelectionMenu(Info** i, int *sel)
 	else return 0;
 }
 
-void GameProcess(Info** i, int sv, bool* shouldExit, bool (*OpInf)(Info**, Save**, double*, int), short (*selH)(short*, bool*))
+void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*))
 {
 	static double st;
 	static bool isReady;
@@ -326,6 +311,15 @@ void GameProcess(Info** i, int sv, bool* shouldExit, bool (*OpInf)(Info**, Save*
 		save->stats.maxHP = 100;
 		save->stats.spValue = 0;
 		save->roomNum = 0;
+		save->roomType = 0;
+		save->enemyStats.enType = 0;
+		save->enemyStats.dmgN = 0;
+		save->enemyStats.dmgH = 0;
+		save->enemyStats.hp = 0;
+		save->enemyStats.maxHP = 0;
+		save->enemyStats.modAt = 0;
+		save->enemyStats.rewGold = 0;
+		save->enemyStats.spV = 0;
 		fwrite(save, sizeof(Save), 1, f);
 		delete save;
 		save = nullptr;
@@ -344,7 +338,7 @@ void GameProcess(Info** i, int sv, bool* shouldExit, bool (*OpInf)(Info**, Save*
 		h = new Warrior;
 		break;
 	case 2:
-		//h = new Archer;
+		h = new Archer;
 		break;
 	case 3:
 		//h = new Palladin;
@@ -379,7 +373,6 @@ void GameProcess(Info** i, int sv, bool* shouldExit, bool (*OpInf)(Info**, Save*
 			if (save->minutes == 60) save->hours++;
 			if (save->hours == 24) save->days++;
 		}
-		if (IsKeyPressed(KEY_I)) *shouldExit = OpInf(i, &save, &st, sv);
 		if (isReady) isReady = NextRoom(&h, &save, &st, shouldExit, *i);
 		else if(!(*shouldExit))
 		{
@@ -407,6 +400,14 @@ void GameProcess(Info** i, int sv, bool* shouldExit, bool (*OpInf)(Info**, Save*
 		save->stats.maxHP = 100;
 		save->stats.spValue = 0;
 		save->roomNum = 0;
+		save->enemyStats.enType = 0;
+		save->enemyStats.dmgN = 0;
+		save->enemyStats.dmgH = 0;
+		save->enemyStats.hp = 0;
+		save->enemyStats.maxHP = 0;
+		save->enemyStats.modAt = 0;
+		save->enemyStats.rewGold = 0;
+		save->enemyStats.spV = 0;
 		fwrite(save, sizeof(Save), 1, f);
 	}
 	else if (save != NULL && h != NULL)
