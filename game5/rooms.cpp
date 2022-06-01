@@ -84,8 +84,7 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			DrawText(TextFormat("Heavy attack damage: %d", (*h)->minHDMG), 250, HEIGHT / 2 + 220, 24, BLACK);
 			DrawText(TextFormat("Special value: %d", (*h)->spValue), 250, HEIGHT / 2 + 260, 24, BLACK);
 			DrawText(TextFormat("Evasion: %d%", (*h)->evasion), 250, HEIGHT / 2 + 300, 24, BLACK);
-			if ((*h)->isUnreachable) DrawText("Is Hero unreachable?: true", 250, HEIGHT / 2 + 340, 24, BLACK);
-			else DrawText("Is Hero unreachable?: false", 250, HEIGHT / 2 + 340, 24, BLACK);
+			DrawText(TextFormat("Buff duration: %d", (*h)->buffsN), 250, HEIGHT / 2 + 340, 24, BLACK);
 			DrawText(TextFormat("Gold: %d", (*h)->gold), 250, HEIGHT / 2 + 380, 24, BLACK);
 
 			if(isBoss) DrawText("Boss", 1000, HEIGHT / 2 + 20, 24, BLACK);
@@ -124,8 +123,10 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			(*r)->hp = rand() % 4;
 			(*r)->minNDMG = rand() % 3;
 			(*r)->minHDMG = rand() % 3;
-			(*r)->evasion = rand() % 2;
-			(*r)->spValue = rand() % 4;
+			if ((*h)->evasion < 60) (*r)->evasion = rand() % 2;
+			else (*r)->evasion = 0;
+			if ((*sv)->charact == 1)(*r)->spValue = rand() % 4;
+			else if ((*sv)->charact == 2) (*r)->spValue = 0;
 			(*h)->gold = (*r)->gold;
 			(*h)->hp += (*r)->hp;
 			(*h)->maxHP += (*r)->hp;
@@ -144,7 +145,7 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 		{
 			if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st);
 			BeginDrawing();
-			DrawText("Press Space to continue", WIDTH / 2 - 185, HEIGHT / 2 - 200, 30, BLACK);
+			DrawText("Press Space to continue", WIDTH / 2 - 150, HEIGHT / 2 - 200, 30, BLACK);
 			ClearBackground(WHITE);
 			EndDrawing();
 		}
@@ -156,9 +157,38 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 bool Shop(Hero** h, Save** sv, double* st, Info* inf)
 {
 	static bool shouldExit;
+	static short sel;
+	static Vector2 mPos;
+	static int i;
+	short* value = new short[5];
+	short* price = new short[5];
+	bool* isActive = new bool[5];
+	i = 0;
+	for (i = 0; i < 5; i++) isActive[i] = true;
+	value[0] = rand() % 15 + 5;
+	price[0] = value[0];
+	value[1] = rand() % 8 + 4;
+	price[1] = value[1] * 3;
+	value[2] = rand() % 8 + 4;
+	price[2] = value[2] * 3;
+	value[3] = rand() % 4 + 1;
+	price[3] = value[3] * 10;
+	if ((*sv)->charact == 1)
+	{
+		value[4] = rand() % 5 + 5;
+		price[4] = value[4] * 5;
+	}
+	else if ((*sv)->charact == 2)
+	{
+		value[4] = 1;
+		price[4] = value[4] * 40;
+	}
+	if ((*h)->evasion >= 60) isActive[3] = false;
+	sel = 0;
 	shouldExit = false;
 	while (!IsKeyPressed(KEY_B) && !shouldExit)
 	{
+		mPos = GetMousePosition();
 		if (GetTime() - *st >= 60)
 		{
 			*st = GetTime();
@@ -167,18 +197,131 @@ bool Shop(Hero** h, Save** sv, double* st, Info* inf)
 			if ((*sv)->hours == 24) (*sv)->days++;
 		}
 		if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st);
-
+		if (IsKeyPressed(KEY_RIGHT) && sel < 5)
+			sel++;
+		if (IsKeyPressed(KEY_LEFT) && sel > 1)
+			sel--;
+		if (mPos.x >= 110 && mPos.x <= 260
+			&& mPos.y >= HEIGHT / 4 * 3 + 40 && mPos.y <= HEIGHT / 4 * 3 + 80) sel = 1;
+		if (mPos.x >= 410 && mPos.x <= 560
+			&& mPos.y >= HEIGHT / 4 * 3 + 40 && mPos.y <= HEIGHT / 4 * 3 + 80) sel = 2;
+		if (mPos.x >= 760 && mPos.x <= 910
+			&& mPos.y >= HEIGHT / 4 * 3 + 40 && mPos.y <= HEIGHT / 4 * 3 + 80) sel = 3;
+		if (mPos.x >= 1065 && mPos.x <= 1215
+			&& mPos.y >= HEIGHT / 4 * 3 + 40 && mPos.y <= HEIGHT / 4 * 3 + 80) sel = 4;
+		if (mPos.x >= 1335 && mPos.x <= 1485
+			&& mPos.y >= HEIGHT / 4 * 3 + 40 && mPos.y <= HEIGHT / 4 * 3 + 80) sel = 5;
 		BeginDrawing();
 		DrawRectangleLines(20, HEIGHT / 2, WIDTH - 40, HEIGHT / 2 - 20, BLACK);
 
-		DrawText("Shop", WIDTH / 2 - 10, HEIGHT / 2 + 20, 30, BLACK);
+		switch (sel)
+		{
+		case 1:
+			if(isActive[sel - 1]) DrawRectangle(110, HEIGHT / 4 * 3 + 40, 150, 40, YELLOW);
+			break;
+		case 2:
+			if (isActive[sel - 1]) DrawRectangle(410, HEIGHT / 4 * 3 + 40, 150, 40, YELLOW);
+			break;
+		case 3:
+			if (isActive[sel - 1]) DrawRectangle(760, HEIGHT / 4 * 3 + 40, 150, 40, YELLOW);
+			break;
+		case 4:
+			if (isActive[sel - 1]) DrawRectangle(1065, HEIGHT / 4 * 3 + 40, 150, 40, YELLOW);
+			break;
+		case 5:
+			if (isActive[sel - 1]) DrawRectangle(1335, HEIGHT / 4 * 3 + 40, 150, 40, YELLOW);
+			break;
+		}
+		if (!isActive[0]) DrawRectangle(110, HEIGHT / 4 * 3 + 40, 150, 40, GRAY);
+		if (!isActive[1]) DrawRectangle(410, HEIGHT / 4 * 3 + 40, 150, 40, GRAY);
+		if (!isActive[2]) DrawRectangle(760, HEIGHT / 4 * 3 + 40, 150, 40, GRAY);
+		if (!isActive[3]) DrawRectangle(1065, HEIGHT / 4 * 3 + 40, 150, 40, GRAY);
+		if (!isActive[4]) DrawRectangle(1335, HEIGHT / 4 * 3 + 40, 150, 40, GRAY);
+
+		DrawText("Shop", WIDTH / 2 - 20, HEIGHT / 2 + 20, 30, BLACK);
+
+		DrawText(TextFormat("+%d maximum HP", value[0]), 100, HEIGHT / 4 * 3 - 12, 24, BLACK);
+		DrawRectangleLines(110, HEIGHT / 4 * 3 + 40, 150, 40, BLACK);
+		DrawText(TextFormat("%d G", price[0]), 170, HEIGHT / 4 * 3 + 48, 24, BLACK);
+
+		DrawText(TextFormat("+%d minimum normal DMG", value[1]), 350, HEIGHT / 4 * 3 - 12, 24, BLACK);
+		DrawRectangleLines(410, HEIGHT / 4 * 3 + 40, 150, 40, BLACK);
+		DrawText(TextFormat("%d G", price[1]), 465, HEIGHT / 4 * 3 + 48, 24, BLACK);
+
+		DrawText(TextFormat("+%d minimum heavy DMG", value[2]), 700, HEIGHT / 4 * 3 - 12, 24, BLACK);
+		DrawRectangleLines(760, HEIGHT / 4 * 3 + 40, 150, 40, BLACK);
+		DrawText(TextFormat("%d G", price[2]), 815, HEIGHT / 4 * 3 + 48, 24, BLACK);
+
+		DrawText(TextFormat("+%d evasion", value[3]), 1075, HEIGHT / 4 * 3 - 12, 24, BLACK);
+		DrawRectangleLines(1065, HEIGHT / 4 * 3 + 40, 150, 40, BLACK);
+		DrawText(TextFormat("%d G", price[3]), 1120, HEIGHT / 4 * 3 + 48, 24, BLACK);
+
+		DrawText(TextFormat("+%d special value", value[4]), 1300, HEIGHT / 4 * 3 - 12, 24, BLACK);
+		DrawRectangleLines(1335, HEIGHT / 4 * 3 + 40, 150, 40, BLACK);
+		DrawText(TextFormat("%d G", price[4]), 1390, HEIGHT / 4 * 3 + 48, 24, BLACK);
+
+		DrawText(TextFormat("%d G", (*h)->gold), 70, HEIGHT / 2 + 20, 24, BLACK);
+
 		ClearBackground(WHITE);
 		EndDrawing();
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || IsKeyPressed(KEY_ENTER))
+		{
+			switch (sel)
+			{
+			case 1:
+				if (isActive[sel - 1] && (*h)->gold >= price[sel - 1])
+				{
+					(*h)->gold -= price[sel - 1];
+					(*h)->hp += value[sel - 1];
+					(*h)->maxHP += value[sel - 1];
+					isActive[sel - 1] = false;
+				}
+				break;
+			case 2:
+				if (isActive[sel - 1] && (*h)->gold >= price[sel - 1])
+				{
+					(*h)->gold -= price[sel - 1];
+					(*h)->minNDMG += value[sel - 1];
+					isActive[sel - 1] = false;
+				}
+				break;
+			case 3:
+				if (isActive[sel - 1] && (*h)->gold >= price[sel - 1])
+				{
+					(*h)->gold -= price[sel - 1];
+					(*h)->minHDMG += value[sel - 1];
+					isActive[sel - 1] = false;
+				}
+				break;
+			case 4:
+				if (isActive[sel - 1] && (*h)->gold >= price[sel - 1])
+				{
+					(*h)->gold -= price[sel - 1];
+					(*h)->evasion += value[sel - 1];
+					isActive[sel - 1] = false;
+				}
+				break;
+			case 5:
+				if (isActive[sel - 1] && (*h)->gold >= price[sel - 1])
+				{
+					(*h)->gold -= price[sel - 1];
+					(*h)->spValue += value[sel - 1];
+					isActive[sel - 1] = false;
+				}
+				break;
+			}
+		}
 		if (WindowShouldClose())
 		{
 			shouldExit = true;
 		}
 	}
+	delete[] value;
+	delete[] price;
+	delete[] isActive;
+	value = nullptr;
+	price = nullptr;
+	isActive = nullptr;
 	if (shouldExit) return true;
 	else return false;
 }
@@ -267,10 +410,10 @@ bool RestRoom(Hero** h, Save** sv, double* st, Info* inf)
 			(*h)->minHDMG += rand() % 3 + 1;
 			break;
 		case 4:
-			(*h)->evasion += 1;
+			if((*h)->evasion < 60) (*h)->evasion += 1;
 			break;
 		case 5:
-			(*h)->spValue += rand() % 4 + 1;
+			if((*sv)->charact != 2)(*h)->spValue += rand() % 4 + 1;
 			break;
 		}
 	}

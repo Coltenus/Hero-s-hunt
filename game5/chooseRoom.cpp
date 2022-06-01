@@ -27,7 +27,7 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf)
 		en->rewGold = (*sv)->enemyStats.rewGold;
 		en->spValue = (*sv)->enemyStats.spV;
 	}
-	if (isNewRoom && (*sv)->enemyStats.enType >= 1 && (*sv)->enemyStats.enType <= 100 && (*sv)->roomNum != 10) en = new Zombie((*sv)->roomNum);
+	if (isNewRoom && (*sv)->enemyStats.enType >= 1 && (*sv)->enemyStats.enType <= 100 && (*sv)->roomNum != 15) en = new Zombie((*sv)->roomNum);
 	if (isNewRoom && (*sv)->roomType == 0) (*sv)->roomType = rand() % 100 + 1;
 	while (!IsKeyPressed(KEY_SPACE) && !(*shouldExit))
 	{
@@ -42,7 +42,7 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf)
 		if (WindowShouldClose()) *shouldExit = true;
 		BeginDrawing();
 		DrawText(TextFormat("Room %hu", (*sv)->roomNum), WIDTH / 2 - 25, HEIGHT / 2 - 150, 30, BLACK);
-		if((*sv)->roomNum == 10) DrawText("Boss", WIDTH / 2 - 15, HEIGHT / 2 - 50, 30, BLACK);
+		if((*sv)->roomNum == 15) DrawText("Boss", WIDTH / 2 - 15, HEIGHT / 2 - 50, 30, BLACK);
 		else if ((*sv)->roomType >= 1 && (*sv)->roomType <= 60)
 		{
 			DrawText("Battle against", WIDTH / 2 - 75, HEIGHT / 2 - 50, 30, BLACK);
@@ -50,12 +50,13 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf)
 		}
 		else if((*sv)->roomType >= 61 && (*sv)->roomType <= 80) DrawText("Shop", WIDTH / 2 - 20, HEIGHT / 2 - 50, 30, BLACK);
 		else DrawText("Rest room", WIDTH / 2 - 50, HEIGHT / 2 - 50, 30, BLACK);
+		DrawText("Press Space to continue", WIDTH / 2 - 150, HEIGHT / 2 + 100, 30, BLACK);
 		ClearBackground(WHITE);
 		EndDrawing();
 	}
-	if((*sv)->roomNum == 10 && !(*shouldExit))
+	if((*sv)->roomNum == 15 && !(*shouldExit))
 	{
-	    if(isNewRoom) en = new Zombie((*sv)->roomNum*3);
+	    if(isNewRoom) en = new Zombie((*sv)->roomNum*2);
 	    *shouldExit = Battle(h, &en, &r, sv, inf, st, true);
 		if ((*h)->hp <= 0 || (*h)->hp > 0 && en->hp <= 0) return false;
 		else *shouldExit = true;

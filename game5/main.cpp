@@ -36,7 +36,7 @@ int main()
 	while (!IsKeyPressed(KEY_ENTER) && !shouldExit)
 	{
 		BeginDrawing();
-		DrawText("Press Enter to continue", WIDTH / 2 - 175, HEIGHT / 2 - 200, 30, BLACK);
+		DrawText("Press Enter to continue", WIDTH / 2 - 160, HEIGHT / 2 - 200, 30, BLACK);
 		ClearBackground(WHITE);
 		EndDrawing();
 		if (WindowShouldClose()) shouldExit = true;
@@ -204,7 +204,7 @@ int SelectionMenu(Info** i, int *sel)
 		DrawRectangle(WIDTH / 2 + 170, HEIGHT / 2 + 160, 80, 80, YELLOW);
 		break;
 	}
-	DrawText("Choose save file", WIDTH / 2 - 130, HEIGHT / 2 - 320, 30, BLACK);
+	DrawText("Choose save file", WIDTH / 2 - 120, HEIGHT / 2 - 320, 30, BLACK);
 
 	DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 - 200, 300, 80, BLACK);
 	DrawText(TextFormat("%d", 1), WIDTH / 2 - 6, HEIGHT / 2 - 172, 24, BLACK);
@@ -379,7 +379,7 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		else if(!(*shouldExit))
 		{
 			BeginDrawing();
-			if(h->hp > 0) DrawText("You've won!", WIDTH / 2 - 100, HEIGHT / 2 - 150, 30, BLUE);
+			if(h->hp > 0) DrawText("You've won!", WIDTH / 2 - 90, HEIGHT / 2 - 150, 30, BLUE);
 			else DrawText("You're dead...", WIDTH / 2 - 100, HEIGHT / 2 - 150, 30, RED);
 			if (h->hp > 0) ClearBackground(WHITE);
 			else ClearBackground(BLACK);

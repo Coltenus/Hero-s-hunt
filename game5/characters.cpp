@@ -9,7 +9,7 @@ string ws1 = "Block";
 
 string aa1 = "Triple shot";
 string aa2 = "Accurate shot";
-string as1 = "Evade";
+string as1 = "Invisible";
 
 
 Warrior::Warrior()
@@ -44,7 +44,7 @@ Warrior::Warrior()
 	hp = 100;
 	gold = 0;
 	evasion = 15;
-	isUnreachable = false;
+	buffsN = 0;
 	delete i;
 	i = nullptr;
 }
@@ -98,7 +98,8 @@ Zombie::~Zombie()
 
 void Zombie::Attack(Hero** h)
 {
-	if (!(*h)->isUnreachable)
+	if ((*h)->buffsN < 0) (*h)->buffsN = 0;
+	if ((*h)->buffsN == 0)
 	{
 		if (rand() % 100 + 1 > (*h)->evasion)
 		{
@@ -110,13 +111,12 @@ void Zombie::Attack(Hero** h)
 			}
 		}
 	}
-	else (*h)->isUnreachable = false;
 	modAt = 1;
 }
 
 void Zombie::HeavyAttack(Hero** h)
 {
-	if (!(*h)->isUnreachable)
+	if ((*h)->buffsN == 0)
 	{
 		if (rand() % 100 + 1 > 2 * (*h)->evasion)
 		{
@@ -129,7 +129,6 @@ void Zombie::HeavyAttack(Hero** h)
 			}
 		}
 	}
-	else (*h)->isUnreachable = false; 
 	modAt = 1;
 }
 
@@ -160,7 +159,7 @@ Archer::Archer()
 		hA[*i] = aa2[*i];
 		(*i)++;
 	}
-	spValue = 15;
+	spValue = 1;
 	sp = new char[as1.length() + 1];
 	*i = 0;
 	while (*i <= as1.length())
@@ -172,7 +171,7 @@ Archer::Archer()
 	hp = 80;
 	gold = 0;
 	evasion = 25;
-	isUnreachable = false;
+	buffsN = 0;
 	delete i;
 	i = nullptr;
 }
@@ -190,6 +189,7 @@ Archer::~Archer()
 void Archer::Attack(Enemy** e)
 {
 	static int* i;
+	if (buffsN > 0) buffsN--;
 	i = new int;
 	*i = 0;
 	while (*i < 3)
@@ -206,10 +206,12 @@ void Archer::Attack(Enemy** e)
 
 void Archer::HeavyAttack(Enemy** e)
 {
+	if (buffsN > 0) buffsN--;
 	(*e)->hp -= rand() % 4 + minHDMG;
 }
 
 void Archer::Special()
 {
-	isUnreachable = true;
+	if (buffsN > 0) buffsN--;
+	buffsN += spValue;
 }

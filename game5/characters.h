@@ -14,11 +14,10 @@ public:
 	virtual void Special() = 0;
 public:
 	char* nA, * hA, * sp;
-	short maxHP, hp, block, evasion;
+	short maxHP, hp, block, evasion, buffsN;
 	int minNDMG;
 	int minHDMG;
 	int spValue;
-	bool isUnreachable;
 	unsigned short gold;
 };
 
