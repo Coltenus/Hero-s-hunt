@@ -19,10 +19,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="characters.cpp" />
+    <ClCompile Include="chooseRoom.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="rooms.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="raylib.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="characters.h" />
+    <ClInclude Include="chooseRoom.h" />
+    <ClInclude Include="rooms.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

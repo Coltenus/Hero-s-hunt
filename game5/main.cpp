@@ -1,31 +1,22 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <raylib.hpp>
+#include <time.h>
 using namespace std;
 
-#define WIDTH 1600
-#define HEIGHT 900
-
-typedef struct _info
-{
-	char username[20];
-}Info;
-
-typedef struct _save
-{
-	int order;
-	long clicks;
-	int minutes, hours, days;
-}Save;
+#include "characters.h"
+#include "chooseRoom.h"
 
 bool OpenInfo(Info**, Save**, double*, int);
 void FillFile();
 void EnterUsername(Info**, bool*);
 int SelectionMenu(Info**, int*);
-void GameProcess(Info**, int, bool*, bool (*)(Info**, Save**, double*, int));
+void GameProcess(Info**, int, bool*, bool (*)(Info**, Save**, double*, int), short (*)(short*, bool*));
+short SelectHero(short*, bool*);
 
 int main()
 {
+	srand((unsigned)time(NULL));
 	int curSave = 0;
 	int sel = 0;
 	double st = -1;
@@ -58,17 +49,20 @@ int main()
 			curSave = SelectionMenu(&inf, &sel);
 			break;
 		case 1:
-			GameProcess(&inf, 1, &shouldExit, OpenInfo);
+			GameProcess(&inf, 1, &shouldExit, OpenInfo, SelectHero);
+			shouldExit = false;
 			curSave = 0;
 			sel = 0;
 			break;
 		case 2:
-			GameProcess(&inf, 2, &shouldExit, OpenInfo);
+			GameProcess(&inf, 2, &shouldExit, OpenInfo, SelectHero);
+			shouldExit = false;
 			curSave = 0;
 			sel = 0;
 			break;
 		case 3:
-			GameProcess(&inf, 3, &shouldExit,OpenInfo);
+			GameProcess(&inf, 3, &shouldExit,OpenInfo, SelectHero);
+			shouldExit = false;
 			curSave = 0;
 			sel = 0;
 			break;
@@ -86,7 +80,7 @@ int main()
 		}
 	}
 	delete inf;
-	inf = NULL;
+	inf = nullptr;
 	return 0;
 }
 
@@ -273,25 +267,37 @@ int SelectionMenu(Info** i, int *sel)
 			save->minutes = 0;
 			save->hours = 0;
 			save->days = 0;
-			save->clicks = 0;
+			save->gold = 0;
 			save->order = *sel - 3;
+			save->charact = 0;
+			save->stats.dmgN = 0;
+			save->stats.dmgH = 0;
+			save->stats.evasion = 0;
+			save->stats.hp = 0;
+			save->stats.maxHP = 100;
+			save->stats.spValue = 0;
+			save->roomNum = 0;
 			fwrite(save, sizeof(Save), 1, f);
 			delete save;
 			save = NULL;
 			fclose(f);
 		}
 		delete[] buf;
-		buf = NULL;
+		buf = nullptr;
 	}
 	if (IsKeyPressed(KEY_ENTER)) return *sel;
 	else return 0;
 }
 
-void GameProcess(Info** i, int sv, bool* shouldExit, bool (*OpInf)(Info**, Save**, double*, int))
+void GameProcess(Info** i, int sv, bool* shouldExit, bool (*OpInf)(Info**, Save**, double*, int), short (*selH)(short*, bool*))
 {
 	static double st;
-	Save* save = new Save;
-	FILE* f;
+	static bool isReady;
+	static Save* save;
+	static FILE* f;
+	static Hero* h;
+	static Enemy* en;
+	static short chooseH, room;
 	char* buf = new char[6];
 	buf[0] = 's';
 	buf[1] = 'a';
@@ -299,6 +305,10 @@ void GameProcess(Info** i, int sv, bool* shouldExit, bool (*OpInf)(Info**, Save*
 	buf[3] = 'e';
 	buf[4] = (char)sv + 48;
 	buf[5] = '\0';
+	isReady = true;
+	chooseH = 0;
+	save = new Save;
+	h = NULL;
 	f = fopen(buf, "rb");
 	if (f == NULL)
 	{
@@ -306,16 +316,50 @@ void GameProcess(Info** i, int sv, bool* shouldExit, bool (*OpInf)(Info**, Save*
 		save->minutes = 0;
 		save->hours = 0;
 		save->days = 0;
-		save->clicks = 0;
+		save->gold = 0;
 		save->order = sv;
+		save->charact = 0;
+		save->stats.dmgN = 0;
+		save->stats.dmgH = 0;
+		save->stats.evasion = 0;
+		save->stats.hp = 0;
+		save->stats.maxHP = 100;
+		save->stats.spValue = 0;
+		save->roomNum = 0;
 		fwrite(save, sizeof(Save), 1, f);
 		delete save;
-		save = NULL;
+		save = nullptr;
 		fclose(f);
 		save = new Save;
 		f = fopen(buf, "rb");
 	}
 	fread(save, sizeof(Save), 1, f);
+	while (save->charact == 0 && !(*shouldExit))
+	{
+		save->charact = selH(&chooseH, shouldExit);
+	}
+	switch (save->charact)
+	{
+	case 1:
+		h = new Warrior;
+		break;
+	case 2:
+		//h = new Archer;
+		break;
+	case 3:
+		//h = new Palladin;
+		break;
+	}
+	if (save->stats.hp != 0)
+	{
+		h->hp = save->stats.hp;
+		h->maxHP = save->stats.maxHP;
+		h->minNDMG = save->stats.dmgN;
+		h->minHDMG = save->stats.dmgH;
+		h->spValue = save->stats.spValue;
+		h->evasion = save->stats.evasion;
+		h->gold = save->gold;
+	}
 	fclose(f);
 	while (!IsKeyPressed(KEY_ENTER) && !(*shouldExit))
 	{
@@ -336,18 +380,116 @@ void GameProcess(Info** i, int sv, bool* shouldExit, bool (*OpInf)(Info**, Save*
 			if (save->hours == 24) save->days++;
 		}
 		if (IsKeyPressed(KEY_I)) *shouldExit = OpInf(i, &save, &st, sv);
-		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) save->clicks++;
-		BeginDrawing();
-		DrawText(TextFormat("You clicked %d time(s)!", save->clicks), WIDTH / 2 - 160, HEIGHT / 2 - 200, 30, BLACK);
-		ClearBackground(WHITE);
-		EndDrawing();
+		if (isReady) isReady = NextRoom(&h, &save, &st, shouldExit, *i);
+		else if(!(*shouldExit))
+		{
+			BeginDrawing();
+			if(h->hp > 0) DrawText("You've won!", WIDTH / 2 - 100, HEIGHT / 2 - 150, 30, BLUE);
+			else DrawText("You're dead...", WIDTH / 2 - 100, HEIGHT / 2 - 150, 30, RED);
+			if (h->hp > 0) ClearBackground(WHITE);
+			else ClearBackground(BLACK);
+			EndDrawing();
+		}
 		if (WindowShouldClose()) *shouldExit = true;
 	}
 	f = fopen(buf, "rb+");
-	fwrite(save, sizeof(Save), 1, f);
+	if (h->hp <= 0 || save->roomNum == 10 && h->hp > 0)
+	{
+		save->minutes = 0;
+		save->hours = 0;
+		save->days = 0;
+		save->gold = 0;
+		save->charact = 0;
+		save->stats.dmgN = 0;
+		save->stats.dmgH = 0;
+		save->stats.evasion = 0;
+		save->stats.hp = 0;
+		save->stats.maxHP = 100;
+		save->stats.spValue = 0;
+		save->roomNum = 0;
+		fwrite(save, sizeof(Save), 1, f);
+	}
+	else if (save != NULL && h != NULL)
+	{
+		save->stats.hp = h->hp;
+		save->stats.maxHP = h->maxHP;
+		save->stats.dmgN = h->minNDMG;
+		save->stats.dmgH = h->minHDMG;
+		save->stats.spValue = h->spValue;
+		save->stats.evasion = h->evasion;
+		save->gold = h->gold;
+		if (shouldExit) save->roomNum--;
+		fwrite(save, sizeof(Save), 1, f);
+	}
 	fclose(f);
-	delete save;
-	save = NULL;
-	delete[] buf;
-	buf = NULL;
+	if (save != NULL)
+	{
+		delete save;
+		save = nullptr;
+	}
+	if (buf != NULL)
+	{
+		delete[] buf;
+		buf = nullptr;
+	}
+	if (h != NULL)
+	{
+		delete h;
+		h = nullptr;
+	}
+	if (en != NULL)
+	{
+		delete en;
+		en = nullptr;
+	}
+}
+
+short SelectHero(short* sel, bool* shouldExit)
+{
+	static Vector2 mPos;
+	mPos = GetMousePosition();
+	BeginDrawing();
+	if (IsKeyPressed(KEY_DOWN) && *sel < 3)
+		(*sel)++;
+	if (IsKeyPressed(KEY_UP) && *sel > 1)
+		(*sel)--;
+	if (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+		&& mPos.y >= HEIGHT / 2 - 200 && mPos.y <= HEIGHT / 2 - 120) *sel = 1;
+	if (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+		&& mPos.y >= HEIGHT / 2 - 20 && mPos.y <= HEIGHT / 2 + 60) *sel = 2;
+	if (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+		&& mPos.y >= HEIGHT / 2 + 160 && mPos.y <= HEIGHT / 2 + 240) *sel = 3;
+	switch (*sel)
+	{
+	case 1:
+		DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 - 200, 300, 80, YELLOW);
+		break;
+	case 2:
+		DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 - 20, 300, 80, YELLOW);
+		break;
+	case 3:
+		DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 + 160, 300, 80, YELLOW);
+		break;
+	}
+	DrawText("Choose Hero", WIDTH / 2 - 110, HEIGHT / 2 - 320, 30, BLACK);
+
+	DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 - 200, 300, 80, BLACK);
+	DrawText("Warrior", WIDTH / 2 - 40, HEIGHT / 2 - 172, 24, BLACK);
+
+	DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 - 20, 300, 80, BLACK);
+	DrawText("Archer", WIDTH / 2 - 40, HEIGHT / 2 + 8, 24, BLACK);
+
+	DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 + 160, 300, 80, BLACK);
+	DrawText("Palladin", WIDTH / 2 - 40, HEIGHT / 2 + 188, 24, BLACK);
+
+	ClearBackground(WHITE);
+	EndDrawing();
+	if (WindowShouldClose())
+	{
+		*shouldExit = true;
+		return 0;
+	}
+	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && *sel >= 1 && *sel <= 3) return *sel;
+	if (IsKeyPressed(KEY_ENTER)) return *sel;
+	else return 0;
 }
