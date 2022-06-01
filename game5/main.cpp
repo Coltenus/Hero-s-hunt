@@ -222,6 +222,8 @@ int SelectionMenu(Info** i, int *sel)
 	DrawText("Clear", WIDTH / 2 + 185, HEIGHT / 2 + 190, 20, BLACK);
 
 	DrawText(TextFormat("Username: %s", (*i)->username), 50, 50, 30, BLACK);
+
+	DrawText("Made by Coltenus", WIDTH - 310, HEIGHT - 36, 34, BLACK);
 	ClearBackground(WHITE);
 	EndDrawing();
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && *sel >= 1 && *sel <= 3) return *sel;
