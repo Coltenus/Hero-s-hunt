@@ -6,8 +6,8 @@ class Enemy;
 class Hero
 {
 public:
-	Hero(){}
-	~Hero(){}
+	Hero();
+	~Hero();
 public:
 	virtual void Attack(Enemy** e) = 0;
 	virtual void HeavyAttack(Enemy** e) = 0;
@@ -24,14 +24,14 @@ public:
 class Enemy
 {
 public:
-	Enemy() {}
-	~Enemy() {}
+	Enemy();
+	~Enemy();
 public:
 	virtual void Attack(Hero** h) = 0;
 	virtual void HeavyAttack(Hero** h) = 0;
 	virtual void Special() = 0;
 public:
-	short maxHP, hp, rewGold, modAt;
+	short maxHP, hp, rewGold, modAt, enemType;
 	int minNDMG;
 	int minHDMG;
 	int spValue;

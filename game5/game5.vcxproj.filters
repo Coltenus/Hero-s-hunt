@@ -32,11 +32,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="raylib.dll">
-      <Filter>Resource Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="characters.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -52,5 +47,22 @@
     <ClInclude Include="info.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="msvcp140d.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="raylib.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="vcruntime140_1d.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="vcruntime140d.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="ucrtbased.dll">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

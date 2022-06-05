@@ -11,6 +11,57 @@ string aa1 = "Triple shot";
 string aa2 = "Accurate shot";
 string as1 = "Invisible";
 
+Hero::Hero()
+{
+	nA = nullptr;
+	hA = nullptr;
+	sp = nullptr;
+	maxHP = 0;
+	hp = 0;
+	block = 0;
+	evasion = 0;
+	buffsN = 0;
+	minNDMG = 0;
+	minHDMG = 0;
+	spValue = 0;
+	gold = 0;
+}
+
+Hero::~Hero()
+{
+	if (nA != nullptr)
+	{
+		delete[] nA;
+		nA = nullptr;
+	}
+	if (hA != nullptr)
+	{
+		delete[] hA;
+		hA = nullptr;
+	}
+	if (sp != nullptr)
+	{
+		delete[] sp;
+		sp = nullptr;
+	}
+}
+
+Enemy::Enemy()
+{
+	maxHP = 0;
+	hp = 0;
+	rewGold = 0;
+	modAt = 0;
+	minNDMG = 0;
+	minHDMG = 0;
+	spValue = 0;
+	enemType = 0;
+}
+
+Enemy::~Enemy()
+{
+
+}
 
 Warrior::Warrior()
 {
@@ -89,6 +140,7 @@ Zombie::Zombie(unsigned short r)
 	hp = maxHP;
 	rewGold = 5;
 	modAt = 1;
+	enemType = 1;
 }
 
 Zombie::~Zombie()

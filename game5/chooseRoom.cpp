@@ -8,6 +8,8 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf)
 {
 	static Rewards* r;
 	static bool isNewRoom;
+	static Texture2D enemyTexture, bg;
+	static Rectangle frameRec;
 	isNewRoom = true;
 	(*sv)->roomNum++;
 	r = new Rewards;
@@ -29,7 +31,7 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf)
 	}
 	if (isNewRoom && (*sv)->enemyStats.enType >= 1 && (*sv)->enemyStats.enType <= 100 && (*sv)->roomNum != 15) en = new Zombie((*sv)->roomNum);
 	if (isNewRoom && (*sv)->roomType == 0) (*sv)->roomType = rand() % 100 + 1;
-	while (!IsKeyPressed(KEY_SPACE) && !(*shouldExit))
+	while (!IsKeyPressed(KEY_SPACE) && !IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !(*shouldExit))
 	{
 		if (GetTime() - *st >= 60)
 		{
@@ -51,7 +53,7 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf)
 		else if((*sv)->roomType >= 61 && (*sv)->roomType <= 80) DrawText("Shop", WIDTH / 2 - 20, HEIGHT / 2 - 50, 30, BLACK);
 		else DrawText("Rest room", WIDTH / 2 - 50, HEIGHT / 2 - 50, 30, BLACK);
 		DrawText("Press Space to continue", WIDTH / 2 - 150, HEIGHT / 2 + 100, 30, BLACK);
-		ClearBackground(WHITE);
+		ClearBackground(DARKBLUE);
 		EndDrawing();
 	}
 	if((*sv)->roomNum == 15 && !(*shouldExit))
@@ -65,8 +67,14 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf)
 	if ((*sv)->roomType >= 1 && (*sv)->roomType <= 60 && !(*shouldExit)) *shouldExit = Battle(h, &en, &r, sv, inf, st, false);
 	else if((*sv)->roomType >= 61 && (*sv)->roomType <= 80 && !(*shouldExit)) *shouldExit = Shop(h, sv, st, inf);
 	else if((*sv)->roomType >= 81 && (*sv)->roomType <= 100 && !(*shouldExit)) *shouldExit = RestRoom(h, sv, st, inf);
+	if (en->enemType == 1)
+	{
+		enemyTexture = LoadTexture("src/Zombie.png");
+		frameRec = { (float)enemyTexture.width / 4 * 3, 0, (float)enemyTexture.width / 4, (float)enemyTexture.height };
+	}
 	while (r->isActive && !(*shouldExit))
 	{
+		bg = LoadTexture("src/bg.png");
 		if (GetTime() - *st >= 60)
 		{
 			*st = GetTime();
@@ -75,21 +83,26 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf)
 			if ((*sv)->hours == 24) (*sv)->days++;
 		}
 		if (IsKeyPressed(KEY_I)) *shouldExit = OpenInfo(inf, sv, st);
-		if (IsKeyPressed(KEY_ENTER)) r->isActive = false;
+		if (IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) r->isActive = false;
 		if (WindowShouldClose()) *shouldExit = true;
 		BeginDrawing();
-		DrawText(TextFormat("Room %hu", (*sv)->roomNum), WIDTH / 2 - 25, HEIGHT / 2 - 150, 30, BLACK);
-		DrawText(TextFormat("+%hu gold", r->gold), WIDTH / 2 - 25, HEIGHT / 2, 30, BLACK);
-		DrawText(TextFormat("+%hu hp", r->hp), 100, HEIGHT / 2 + 100, 24, BLACK);
-		DrawText(TextFormat("+%hu min normal DMG", r->minNDMG), 400, HEIGHT / 2 + 100, 24, BLACK);
-		DrawText(TextFormat("+%hu min heavy DMG", r->minNDMG), 700, HEIGHT / 2 + 100, 24, BLACK);
-		DrawText(TextFormat("+%hu special value", r->spValue), 1000, HEIGHT / 2 + 100, 24, BLACK);
-		DrawText(TextFormat("+%hu evasion", r->evasion), 1300, HEIGHT / 2 + 100, 24, BLACK);
+		DrawTexture(bg, 0, 0, WHITE);
+		DrawRectangleLines(20, HEIGHT / 2, WIDTH - 40, HEIGHT / 2 - 20, WHITE);
+		DrawTextureRec(enemyTexture, frameRec, { WIDTH / 2 - 75, HEIGHT / 2 - 450 }, WHITE);
+		DrawText(TextFormat("Room %hu", (*sv)->roomNum), WIDTH / 2 - 25, HEIGHT / 2 + 50, 30, WHITE);
+		DrawText(TextFormat("+%hu gold", r->gold), WIDTH / 2 - 25, HEIGHT / 2 + 200, 30, WHITE);
+		DrawText(TextFormat("+%hu hp", r->hp), 100, HEIGHT / 2 + 300, 24, WHITE);
+		DrawText(TextFormat("+%hu min normal DMG", r->minNDMG), 400, HEIGHT / 2 + 300, 24, WHITE);
+		DrawText(TextFormat("+%hu min heavy DMG", r->minNDMG), 700, HEIGHT / 2 + 300, 24, WHITE);
+		DrawText(TextFormat("+%hu special value", r->spValue), 1000, HEIGHT / 2 + 300, 24, WHITE);
+		DrawText(TextFormat("+%hu evasion", r->evasion), 1300, HEIGHT / 2 + 300, 24, WHITE);
 		ClearBackground(WHITE);
 		EndDrawing();
+		UnloadTexture(bg);
 	}
 	if (*shouldExit)
 	{
+		UnloadTexture(enemyTexture);
 		if (en != NULL)
 		{
 			(*sv)->enemyStats.hp = en->hp;
@@ -110,5 +123,6 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf)
 	if ((*h)->hp <= 0) return false;
 	delete r;
 	r = nullptr;
+	UnloadTexture(enemyTexture);
 	return true;
 }
