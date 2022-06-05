@@ -39,6 +39,9 @@
     <None Include="vcruntime140d.dll" />
     <None Include="vcruntime140_1d.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\smth_related\plans.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
