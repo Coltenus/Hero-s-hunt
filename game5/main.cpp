@@ -173,7 +173,7 @@ void EnterUsername(Info** inf, bool* shouldExit)
 int SelectionMenu(Info** i, int *sel)
 {
 	static Vector2 mPos;
-	static char* buf;
+	static char** buf;
 	static Save* save;
 	static FILE* f;
 	mPos = GetMousePosition();
@@ -241,23 +241,24 @@ int SelectionMenu(Info** i, int *sel)
 	else if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && *sel >= 4 && *sel <= 6)
 	{
 		
-		buf = new char[12];
-		buf[0] = 's';
-		buf[1] = 'a';
-		buf[2] = 'v';
-		buf[3] = 'e';
-		buf[4] = 's';
-		buf[5] = '/';
-		buf[6] = 's';
-		buf[7] = 'a';
-		buf[8] = 'v';
-		buf[9] = 'e';
-		buf[10] = (char)*sel - 3 + 48;
-		buf[11] = '\0';
-		f = fopen(buf, "rb");
+		buf = new char*[12];
+		*buf = (char*)"";
+		switch (*sel)
+		{
+		case 4:
+			*buf = (char*)"saves/save1";
+			break;
+		case 5:
+			*buf = (char*)"saves/save2";
+			break;
+		case 6:
+			*buf = (char*)"saves/save3";
+			break;
+		}
+		f = fopen(*buf, "rb");
 		if (f != NULL)
 		{
-			f = fopen(buf, "wb");
+			f = fopen(*buf, "wb");
 			save = new Save;
 			save->minutes = 0;
 			save->hours = 0;
@@ -293,23 +294,24 @@ int SelectionMenu(Info** i, int *sel)
 	else if (IsKeyPressed(KEY_ENTER) && *sel >= 1 && *sel <= 3) return *sel;
 	else if (IsKeyPressed(KEY_ENTER) && *sel >= 4 && *sel <= 6)
 	{
-		buf = new char[12];
-		buf[0] = 's';
-		buf[1] = 'a';
-		buf[2] = 'v';
-		buf[3] = 'e';
-		buf[4] = 's';
-		buf[5] = '/';
-		buf[6] = 's';
-		buf[7] = 'a';
-		buf[8] = 'v';
-		buf[9] = 'e';
-		buf[10] = (char)*sel - 3 + 48;
-		buf[11] = '\0';
-		f = fopen(buf, "rb");
+		buf = new char* [12];
+		*buf = (char*)"";
+		switch (*sel)
+		{
+		case 4:
+			*buf = (char*)"saves/save1";
+			break;
+		case 5:
+			*buf = (char*)"saves/save2";
+			break;
+		case 6:
+			*buf = (char*)"saves/save3";
+			break;
+		}
+		f = fopen(*buf, "rb");
 		if (f != NULL)
 		{
-			f = fopen(buf, "wb");
+			f = fopen(*buf, "wb");
 			save = new Save;
 			save->minutes = 0;
 			save->hours = 0;
@@ -354,27 +356,28 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 	static Hero* h;
 	static Enemy* en;
 	static short chooseH, room;
-	char *buf = new char[12];
-	buf[0] = 's';
-	buf[1] = 'a';
-	buf[2] = 'v';
-	buf[3] = 'e';
-	buf[4] = 's';
-	buf[5] = '/';
-	buf[6] = 's';
-	buf[7] = 'a';
-	buf[8] = 'v';
-	buf[9] = 'e';
-	buf[10] = (char)sv + 48;
-	buf[11] = '\0';
+	char **buf = new char* [12];
+	*buf = (char*)"";
+	switch (sv)
+	{
+	case 1:
+		*buf = (char*)"saves/save1";
+		break;
+	case 2:
+		*buf = (char*)"saves/save2";
+		break;
+	case 3:
+		*buf = (char*)"saves/save3";
+		break;
+	}
 	isReady = true;
 	chooseH = 0;
 	save = new Save;
 	h = NULL;
-	f = fopen(buf, "rb");
+	f = fopen(*buf, "rb");
 	if (f == NULL)
 	{
-		f = fopen(buf, "wb");
+		f = fopen(*buf, "wb");
 		save->minutes = 0;
 		save->hours = 0;
 		save->days = 0;
@@ -398,11 +401,8 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		save->enemyStats.rewGold = 0;
 		save->enemyStats.spV = 0;
 		fwrite(save, sizeof(Save), 1, f);
-		delete save;
-		save = nullptr;
 		fclose(f);
-		save = new Save;
-		f = fopen(buf, "rb");
+		f = fopen(*buf, "rb");
 	}
 	fread(save, sizeof(Save), 1, f);
 	while (save->charact == 0 && !(*shouldExit))
@@ -463,7 +463,7 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		}
 		if (WindowShouldClose()) *shouldExit = true;
 	}
-	f = fopen(buf, "rb+");
+	f = fopen(*buf, "rb+");
 	if (h->hp <= 0 || save->roomNum == 10 && h->hp > 0)
 	{
 		save->minutes = 0;
@@ -575,19 +575,15 @@ short SelectHero(short* sel, bool* shouldExit)
 
 void CheckStartConditions(int argc, char** argv, bool* shouldExit)
 {
-	char* check = new char[5];
+	char** check = new char*[6];
 	int* i = new int;
 	*i = 0;
-	check[0] = 's';
-	check[1] = 't';
-	check[2] = 'a';
-	check[3] = 'r';
-	check[4] = 't';
+	*check = (char*)"start";
 	if (argc > 1)
 	{
 		while (*i < 5)
 		{
-			if (argv[1][*i] != check[*i]) (*i)++;
+			if (argv[1][*i] != *check[*i]) (*i)++;
 			else break;
 		}
 	}

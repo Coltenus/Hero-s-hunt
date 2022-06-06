@@ -2,5 +2,10 @@ shopkeeper animation
 palladin
 new monsters
 next floor(new bg, new monsters)
-items
+icons of battle values
+
+help menu
+start menu
+
 temporary abilities
+items

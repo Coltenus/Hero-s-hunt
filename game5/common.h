@@ -33,3 +33,9 @@ typedef struct _info
 {
 	char username[20];
 }Info;
+
+typedef struct _resultOfBattle
+{
+	unsigned short hAct, enAct, hVal, enVal;
+	bool hMiss, enMiss;
+}ROB;

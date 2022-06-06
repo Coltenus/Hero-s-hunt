@@ -3,14 +3,6 @@
 #include <iostream>
 using namespace std;
 
-string wa1 = "Sword attack";
-string wa2 = "Sword swing";
-string ws1 = "Block";
-
-string aa1 = "Triple shot";
-string aa2 = "Accurate shot";
-string as1 = "Invisible";
-
 Hero::Hero()
 {
 	nA = nullptr;
@@ -65,39 +57,21 @@ Enemy::~Enemy()
 
 Warrior::Warrior()
 {
-	static short* i;
-	i = new short;
+
 	minNDMG = 10;
-	nA = new char[wa1.length()+1];
-	*i = 0;
-	while (*i <= wa1.length())
-	{
-		nA[*i] = wa1[*i];
-		(*i)++;
-	}
+	nA = new char*[13];
+	*nA = (char*)"Sword attack";
 	minHDMG = 30;
-	hA = new char[wa2.length()+1];
-	*i = 0;
-	while (*i <= wa2.length())
-	{
-		hA[*i] = wa2[*i];
-		(*i)++;
-	}
+	hA = new char*[12];
+	*hA = (char*)"Sword swing";
 	spValue = 15;
-	sp = new char[ws1.length()+1];
-	*i = 0;
-	while (*i <= ws1.length())
-	{
-		sp[*i] = ws1[*i];
-		(*i)++;
-	}
+	sp = new char*[6];
+	*sp = (char*)"Block";
 	maxHP = 100;
 	hp = 100;
 	gold = 0;
 	evasion = 15;
 	buffsN = 0;
-	delete i;
-	i = nullptr;
 }
 
 Warrior::~Warrior()
@@ -110,25 +84,36 @@ Warrior::~Warrior()
 	sp = nullptr;
 }
 
-void Warrior::Attack(Enemy** e)
+void Warrior::Attack(ROB** res, Enemy** e)
 {
+	(*res)->hAct = 1;
+	(*res)->hVal = rand() % 10 + minNDMG;
 	if (rand() % 100 + 1 > 20)
 	{
-		(*e)->hp -= rand() % 10 + minNDMG;
+		(*e)->hp -= (*res)->hVal;
+		(*res)->hMiss = false;
 	}
+	else (*res)->hMiss = true;
 }
 
-void Warrior::HeavyAttack(Enemy** e)
+void Warrior::HeavyAttack(ROB** res, Enemy** e)
 {
+	(*res)->hAct = 2;
+	(*res)->hVal = rand() % 10 + minHDMG;
 	if (rand() % 100 + 1 > 35)
 	{
-		(*e)->hp -= rand() % 10 + minHDMG;
+		(*e)->hp -= (*res)->hVal;
+		(*res)->hMiss = false;
 	}
+	else (*res)->hMiss = true;
 }
 
-void Warrior::Special()
+void Warrior::Special(ROB** res)
 {
+	(*res)->hAct = 3;
 	block += spValue;
+	(*res)->hVal = spValue;
+	(*res)->hMiss = false;
 }
 
 Zombie::Zombie(unsigned short r)
@@ -148,84 +133,82 @@ Zombie::~Zombie()
 
 }
 
-void Zombie::Attack(Hero** h)
+void Zombie::Attack(ROB** res, Hero** h)
 {
+	(*res)->enAct = 1;
+	(*res)->enVal = modAt * (rand() % 5 + minNDMG);
 	if ((*h)->buffsN < 0) (*h)->buffsN = 0;
 	if ((*h)->buffsN == 0)
 	{
 		if (rand() % 100 + 1 > (*h)->evasion)
 		{
-			(*h)->block -= modAt * (rand() % 5 + minNDMG);
+			(*h)->block -= (*res)->enVal;
 			if ((*h)->block < 0)
 			{
 				(*h)->hp += (*h)->block;
 				(*h)->block = 0;
 			}
+			(*res)->enMiss = false;
 		}
+		else (*res)->enMiss = true;
 	}
+	else (*res)->enMiss = true;
 	modAt = 1;
 }
 
-void Zombie::HeavyAttack(Hero** h)
+void Zombie::HeavyAttack(ROB** res, Hero** h)
 {
+	(*res)->enAct = 2;
+	(*res)->enVal = modAt * (rand() % 5 + minHDMG);
 	if ((*h)->buffsN == 0)
 	{
 		if (rand() % 100 + 1 > 2 * (*h)->evasion)
 		{
-			(*h)->block -= modAt * (rand() % 5 + minHDMG);
+			(*h)->block -= (*res)->enVal;
 			if ((*h)->block < 0)
 			{
 				hp -= (short)(0.25 * (*h)->block);
 				(*h)->hp += (*h)->block;
 				(*h)->block = 0;
 			}
+			(*res)->enMiss = false;
 		}
+		else (*res)->enMiss = true;
 	}
+	else (*res)->enMiss = true;
 	modAt = 1;
 }
 
-void Zombie::Special()
+void Zombie::Special(ROB** res)
 {
-	if (rand() % 100 + 1 > 30) hp += spValue;
+	(*res)->enAct = 3;
+	(*res)->enVal = spValue;
+	if (rand() % 100 + 1 > 30)
+	{
+		hp += spValue;
+		(*res)->enMiss = false;
+	}
+	else (*res)->enMiss = true;
 	if (hp > maxHP) hp = maxHP;
 	modAt = 1;
 }
 
 Archer::Archer()
 {
-	static short* i;
-	i = new short;
 	minNDMG = 5;
-	nA = new char[aa1.length() + 1];
-	*i = 0;
-	while (*i <= aa1.length())
-	{
-		nA[*i] = aa1[*i];
-		(*i)++;
-	}
+	nA = new char*[12];
+	*nA = (char*)"Triple shot";
 	minHDMG = 20;
-	hA = new char[aa2.length() + 1];
-	*i = 0;
-	while (*i <= aa2.length())
-	{
-		hA[*i] = aa2[*i];
-		(*i)++;
-	}
+	hA = new char*[14];
+	*hA = (char*)"Accurate shot";
 	spValue = 1;
-	sp = new char[as1.length() + 1];
-	*i = 0;
-	while (*i <= as1.length())
-	{
-		sp[*i] = as1[*i];
-		(*i)++;
-	}
+	sp = new char*[12];
+	*sp = (char*)"Invisiblity";
 	maxHP = 80;
 	hp = 80;
 	gold = 0;
 	evasion = 25;
 	buffsN = 0;
-	delete i;
-	i = nullptr;
 }
 
 Archer::~Archer()
@@ -238,32 +221,46 @@ Archer::~Archer()
 	sp = nullptr;
 }
 
-void Archer::Attack(Enemy** e)
+void Archer::Attack(ROB** res, Enemy** e)
 {
 	static int* i;
+	static bool fl;
+	fl = false;
 	if (buffsN > 0) buffsN--;
 	i = new int;
+	(*res)->hAct = 1;
+	(*res)->hVal = 0;
 	*i = 0;
 	while (*i < 3)
 	{
 		if (rand() % 100 + 1 > 30)
 		{
-			(*e)->hp -= rand() % 6 + minNDMG;
+			(*res)->hVal += rand() % 6 + minNDMG;
+			fl = true;
 		}
 		(*i)++;
 	}
+	(*e)->hp -= (*res)->hVal;
+	if(fl) (*res)->hMiss = false;
+	else (*res)->hMiss = true;
 	delete i;
 	i = nullptr;
 }
 
-void Archer::HeavyAttack(Enemy** e)
+void Archer::HeavyAttack(ROB** res, Enemy** e)
 {
 	if (buffsN > 0) buffsN--;
-	(*e)->hp -= rand() % 4 + minHDMG;
+	(*res)->hAct = 2;
+	(*res)->hVal = rand() % 4 + minHDMG;
+	(*e)->hp -= (*res)->hVal;
+	(*res)->hMiss = false;
 }
 
-void Archer::Special()
+void Archer::Special(ROB** res)
 {
+	(*res)->hAct = 3;
 	if (buffsN > 0) buffsN--;
 	buffsN += spValue;
+	(*res)->hVal = spValue;
+	(*res)->hMiss = false;
 }

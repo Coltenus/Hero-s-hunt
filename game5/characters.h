@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common.h"
+
 class Hero;
 class Enemy;
 
@@ -9,11 +11,11 @@ public:
 	Hero();
 	~Hero();
 public:
-	virtual void Attack(Enemy** e) = 0;
-	virtual void HeavyAttack(Enemy** e) = 0;
-	virtual void Special() = 0;
+	virtual void Attack(ROB**, Enemy**) = 0;
+	virtual void HeavyAttack(ROB**, Enemy**) = 0;
+	virtual void Special(ROB**) = 0;
 public:
-	char* nA, * hA, * sp;
+	char** nA, ** hA, ** sp;
 	short maxHP, hp, block, evasion, buffsN;
 	int minNDMG;
 	int minHDMG;
@@ -27,9 +29,9 @@ public:
 	Enemy();
 	~Enemy();
 public:
-	virtual void Attack(Hero** h) = 0;
-	virtual void HeavyAttack(Hero** h) = 0;
-	virtual void Special() = 0;
+	virtual void Attack(ROB**, Hero**) = 0;
+	virtual void HeavyAttack(ROB**, Hero**) = 0;
+	virtual void Special(ROB**) = 0;
 public:
 	short maxHP, hp, rewGold, modAt, enemType;
 	int minNDMG;
@@ -42,9 +44,9 @@ class Warrior : public Hero
 public:
 	Warrior();
 	~Warrior();
-	void Attack(Enemy** e) override;
-	void HeavyAttack(Enemy** e) override;
-	void Special() override;
+	void Attack(ROB**, Enemy**) override;
+	void HeavyAttack(ROB**, Enemy**) override;
+	void Special(ROB**) override;
 };
 
 class Zombie : public Enemy
@@ -52,9 +54,9 @@ class Zombie : public Enemy
 public:
 	Zombie(unsigned short);
 	~Zombie();
-	void Attack(Hero** h) override;
-	void HeavyAttack(Hero** h) override;
-	void Special() override;
+	void Attack(ROB**, Hero**) override;
+	void HeavyAttack(ROB**, Hero**) override;
+	void Special(ROB**) override;
 };
 
 class  Archer : public Hero
@@ -62,7 +64,7 @@ class  Archer : public Hero
 public:
 	Archer();
 	~Archer();
-	void Attack(Enemy** e) override;
-	void HeavyAttack(Enemy** e) override;
-	void Special() override;
+	void Attack(ROB**, Enemy**) override;
+	void HeavyAttack(ROB**, Enemy**) override;
+	void Special(ROB**) override;
 };

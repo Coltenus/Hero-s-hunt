@@ -2,6 +2,7 @@
 #include <iostream>
 #include <raylib.hpp>
 #include "info.h"
+#include "common.h"
 
 bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st, bool isBoss)
 {
@@ -12,6 +13,8 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 	static Texture2D enemyTexture, bg;
 	static Rectangle frameRec;
 	static int frameSpeed, frameCounter, currentFrame;
+	static ROB* res;
+	res = new ROB;
 	frameCounter = 0;
 	frameSpeed = 3;
 	currentFrame = 0;
@@ -85,13 +88,13 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			DrawRectangleLines(20, HEIGHT / 2, WIDTH - 40, HEIGHT / 2 - 20, WHITE);
 
 			DrawRectangleLines(40, HEIGHT / 2 + 20, 180, 60, WHITE);
-			DrawText((*h)->nA, 45, HEIGHT / 2 + 38, 24, WHITE);
+			DrawText(*((*h)->nA), 45, HEIGHT / 2 + 38, 24, WHITE);
 
 			DrawRectangleLines(40, HEIGHT / 2 + 120, 180, 60, WHITE);
-			DrawText((*h)->hA, 45, HEIGHT / 2 + 138, 24, WHITE);
+			DrawText(*((*h)->hA), 45, HEIGHT / 2 + 138, 24, WHITE);
 
 			DrawRectangleLines(40, HEIGHT / 2 + 220, 180, 60, WHITE);
-			DrawText((*h)->sp, 45, HEIGHT / 2 + 238, 24, WHITE);
+			DrawText(*((*h)->sp), 45, HEIGHT / 2 + 238, 24, WHITE);
 
 			DrawText(inf->username, 250, HEIGHT / 2 + 20, 24, WHITE);
 			switch ((*sv)->charact)
@@ -136,13 +139,13 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 		switch (sel)
 		{
 		case 1:
-			(*h)->Attack(en);
+			(*h)->Attack(&res, en);
 			break;
 		case 2:
-			(*h)->HeavyAttack(en);
+			(*h)->HeavyAttack(&res, en);
 			break;
 		case 3:
-			(*h)->Special();
+			(*h)->Special(&res);
 			break;
 		}
 		if ((*en)->hp <= 0)
@@ -166,20 +169,54 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			break;
 		}
 		sel = rand() % 100 + 1;
-		if (sel >= 1 && sel <= 40) (*en)->Attack(h);
-		else if (sel >= 41 && sel >= 80) (*en)->HeavyAttack(h);
-		else (*en)->Special();
+		if (sel >= 1 && sel <= 40) (*en)->Attack(&res, h);
+		else if (sel >= 41 && sel >= 80) (*en)->HeavyAttack(&res, h);
+		else (*en)->Special(&res);
 		while(!IsKeyPressed(KEY_SPACE) && !IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 		{
 			if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st);
 			BeginDrawing();
-			DrawText("Press Space to continue", WIDTH / 2 - 150, HEIGHT / 2 - 200, 30, BLACK);
+			if(res->hMiss) DrawText("Hero missed with", WIDTH / 2 - 85, HEIGHT / 2 - 300, 30, WHITE);
+			else DrawText("Hero has done", WIDTH / 2 - 80, HEIGHT / 2 - 300, 30, WHITE);
+			switch (res->hAct)
+			{
+			case 1:
+				DrawText(*((*h)->nA), WIDTH / 2 - 65, HEIGHT / 2 - 200, 30, WHITE);
+				break;
+			case 2:
+				DrawText(*((*h)->hA), WIDTH / 2 - 65, HEIGHT / 2 - 200, 30, WHITE);
+				break;
+			case 3:
+				DrawText(*((*h)->sp), WIDTH / 2 - 65, HEIGHT / 2 - 200, 30, WHITE);
+				break;
+			}
+			if (!res->hMiss && res->hAct != 3) DrawText(TextFormat("and dealt %hu damage", res->hVal)
+				, WIDTH / 2 - 100, HEIGHT / 2 - 100, 30, WHITE);
+			else if(!res->hMiss) DrawText(TextFormat("and get %hu buff of this hero", res->hVal)
+				, WIDTH / 2 - 160, HEIGHT / 2 - 100, 30, WHITE);
+			DrawText("Enemy", WIDTH / 2 - 20, HEIGHT / 2, 30, WHITE);
+			if (!res->enMiss && res->enAct != 3) DrawText(TextFormat("dealt %hu damage", res->enVal)
+				, WIDTH / 2 - 80, HEIGHT / 2 + 100, 30, WHITE);
+			else if (!res->enMiss) DrawText(TextFormat("healed by value of %d", res->enVal)
+				, WIDTH / 2 - 110, HEIGHT / 2 + 100, 30, WHITE);
+			else if(res->enMiss && res->enAct != 3) DrawText("missed"
+				, WIDTH / 2 - 25, HEIGHT / 2 + 100, 30, WHITE);
+			else DrawText("couldn't heal" , WIDTH / 2 - 60, HEIGHT / 2 + 100, 30, WHITE);
+			DrawText("Press Space to continue", WIDTH / 2 - 150, HEIGHT / 2 + 200, 30, WHITE);
 			ClearBackground(DARKBLUE);
 			EndDrawing();
+			if (WindowShouldClose()) shouldExit = true;
+			if (shouldExit) break;
 		}
+		if (shouldExit) break;
 	}
 	UnloadTexture(enemyTexture);
 	UnloadTexture(bg);
+	if (res != nullptr)
+	{
+		delete res;
+		res = nullptr;
+	}
 	if (shouldExit) return true;
 	else return false;
 }
@@ -294,6 +331,8 @@ bool Shop(Hero** h, Save** sv, double* st, Info* inf)
 		DrawText(TextFormat("%d G", price[4]), 1390, HEIGHT / 4 * 3 + 48, 24, WHITE);
 
 		DrawText(TextFormat("%d G", (*h)->gold), 70, HEIGHT / 2 + 20, 24, WHITE);
+
+		DrawText(TextFormat("Room %d%", (*sv)->roomNum), 20, 20, 30, WHITE);
 
 		ClearBackground(WHITE);
 		EndDrawing();
@@ -421,6 +460,8 @@ bool RestRoom(Hero** h, Save** sv, double* st, Info* inf)
 
 		DrawRectangleLines(WIDTH / 2 - 100, HEIGHT / 2 + 220, 200, 60, WHITE);
 		DrawText("Random upgrade", WIDTH / 2 - 95, HEIGHT / 2 + 238, 24, WHITE);
+
+		DrawText(TextFormat("Room %d%", (*sv)->roomNum), 20, 20, 30, WHITE);
 
 		ClearBackground(WHITE);
 		EndDrawing();
