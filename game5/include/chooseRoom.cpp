@@ -4,7 +4,7 @@
 #include "rooms.h"
 #include "info.h"
 
-bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf)
+bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf, Audio* a2)
 {
 	static Rewards* r;
 	static bool isNewRoom;
@@ -40,7 +40,7 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf)
 			if ((*sv)->minutes == 60) (*sv)->hours++;
 			if ((*sv)->hours == 24) (*sv)->days++;
 		}
-		if (IsKeyPressed(KEY_I)) *shouldExit = OpenInfo(inf, sv, st);
+		if (IsKeyPressed(KEY_I)) *shouldExit = OpenInfo(inf, sv, st, a2);
 		if (WindowShouldClose()) *shouldExit = true;
 		BeginDrawing();
 		DrawText(TextFormat("Room %hu", (*sv)->roomNum), WIDTH / 2 - 25, HEIGHT / 2 - 150, 30, BLACK);
@@ -55,18 +55,19 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf)
 		DrawText("Press Space to continue", WIDTH / 2 - 150, HEIGHT / 2 + 100, 30, BLACK);
 		ClearBackground(DARKBLUE);
 		EndDrawing();
+		(*a2).update();
 	}
 	if((*sv)->roomNum == 15 && !(*shouldExit))
 	{
 	    if(isNewRoom) en = new Zombie((*sv)->roomNum*2);
-	    *shouldExit = Battle(h, &en, &r, sv, inf, st, true);
+	    *shouldExit = Battle(h, &en, &r, sv, inf, st, true, a2);
 		if ((*h)->hp <= 0 || (*h)->hp > 0 && en->hp <= 0) return false;
 		else *shouldExit = true;
 	}
 	if (*shouldExit) return false;
-	if ((*sv)->roomType >= 1 && (*sv)->roomType <= 60 && !(*shouldExit)) *shouldExit = Battle(h, &en, &r, sv, inf, st, false);
-	else if((*sv)->roomType >= 61 && (*sv)->roomType <= 80 && !(*shouldExit)) *shouldExit = Shop(h, sv, st, inf);
-	else if((*sv)->roomType >= 81 && (*sv)->roomType <= 100 && !(*shouldExit)) *shouldExit = RestRoom(h, sv, st, inf);
+	if ((*sv)->roomType >= 1 && (*sv)->roomType <= 60 && !(*shouldExit)) *shouldExit = Battle(h, &en, &r, sv, inf, st, false, a2);
+	else if((*sv)->roomType >= 61 && (*sv)->roomType <= 80 && !(*shouldExit)) *shouldExit = Shop(h, sv, st, inf, a2);
+	else if((*sv)->roomType >= 81 && (*sv)->roomType <= 100 && !(*shouldExit)) *shouldExit = RestRoom(h, sv, st, inf, a2);
 	if (en->enemType == 1)
 	{
 		enemyTexture = LoadTexture("src/Zombie.png");
@@ -82,7 +83,7 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf)
 			if ((*sv)->minutes == 60) (*sv)->hours++;
 			if ((*sv)->hours == 24) (*sv)->days++;
 		}
-		if (IsKeyPressed(KEY_I)) *shouldExit = OpenInfo(inf, sv, st);
+		if (IsKeyPressed(KEY_I)) *shouldExit = OpenInfo(inf, sv, st, a2);
 		if (IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) r->isActive = false;
 		if (WindowShouldClose()) *shouldExit = true;
 		BeginDrawing();
@@ -98,6 +99,7 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf)
 		DrawText(TextFormat("+%hu evasion", r->evasion), 1300, HEIGHT / 2 + 300, 24, WHITE);
 		ClearBackground(WHITE);
 		EndDrawing();
+		(*a2).update();
 		UnloadTexture(bg);
 	}
 	if (*shouldExit)

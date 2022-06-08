@@ -1,7 +1,7 @@
 #include "info.h"
 #include "raylib.hpp"
 
-bool OpenInfo(Info* i, Save** sv, double* st)
+bool OpenInfo(Info* i, Save** sv, double* st, Audio* a2)
 {
 	static bool fl;
 	fl = true;
@@ -23,6 +23,7 @@ bool OpenInfo(Info* i, Save** sv, double* st)
 		DrawFPS(0, 0);
 		ClearBackground(WHITE);
 		EndDrawing();
+		(*a2).update();
 		if (WindowShouldClose())
 		{
 			fl = false;

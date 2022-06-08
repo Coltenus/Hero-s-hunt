@@ -10,6 +10,8 @@ using namespace std;
 #include "include/common.h"
 #include "include/characters.h"
 #include "include/chooseRoom.h"
+#include "include/audio.h"
+
 
 void FillFile();
 void EnterUsername(Info**, bool*);
@@ -17,6 +19,8 @@ int SelectionMenu(Info**, int*);
 void GameProcess(Info**, int, bool*, short (*)(short*, bool*));
 short SelectHero(short*, bool*);
 void CheckStartConditions(int, char**, bool*);
+int StartMenu(Info**, int*);
+int HelpMenu();
 
 int main(int argc, char** argv)
 {
@@ -26,6 +30,12 @@ int main(int argc, char** argv)
 #endif
 	if (!shouldExit)
 	{
+		InitAudioDevice();
+		char** a = new char* [15];
+		*a = (char*)"src/sound0.mp3";
+		Audio a1(a);
+		delete[] a;
+		a = nullptr;
 		srand((unsigned)time(NULL));
 		int curSave = 0;
 		int sel = 0;
@@ -53,25 +63,41 @@ int main(int argc, char** argv)
 		}
 		while (!WindowShouldClose() && !shouldExit)
 		{
+			a1.update();
 			switch (curSave)
 			{
 			case 0:
+				curSave = StartMenu(&inf, &sel);
+				break;
+			case 4:
 				curSave = SelectionMenu(&inf, &sel);
 				break;
+			case 5:
+				curSave = HelpMenu();
+				break;
+			case 6:
+				shouldExit = true;
+				break;
 			case 1:
+				a1.stop();
 				GameProcess(&inf, 1, &shouldExit, SelectHero);
+				a1.start();
 				shouldExit = false;
 				curSave = 0;
 				sel = 0;
 				break;
 			case 2:
+				a1.stop();
 				GameProcess(&inf, 2, &shouldExit, SelectHero);
+				a1.start();
 				shouldExit = false;
 				curSave = 0;
 				sel = 0;
 				break;
 			case 3:
+				a1.stop();
 				GameProcess(&inf, 3, &shouldExit, SelectHero);
+				a1.start();
 				shouldExit = false;
 				curSave = 0;
 				sel = 0;
@@ -91,6 +117,7 @@ int main(int argc, char** argv)
 		}
 		delete inf;
 		inf = nullptr;
+		CloseAudioDevice();
 	}
 	return 0;
 }
@@ -234,68 +261,12 @@ int SelectionMenu(Info** i, int *sel)
 
 	DrawText(TextFormat("Username: %s", (*i)->username), 50, 50, 30, BLACK);
 
-	DrawText("Made by Coltenus", WIDTH - 310, HEIGHT - 36, 34, BLACK);
 	ClearBackground(SKYBLUE);
 	EndDrawing();
-	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && *sel >= 1 && *sel <= 3) return *sel;
-	else if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && *sel >= 4 && *sel <= 6)
+	if ((IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) && *sel >= 1 && *sel <= 3) return *sel;
+	else if ((IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) && *sel >= 4 && *sel <= 6)
 	{
-		
-		buf = new char*[12];
-		*buf = (char*)"";
-		switch (*sel)
-		{
-		case 4:
-			*buf = (char*)"saves/save1";
-			break;
-		case 5:
-			*buf = (char*)"saves/save2";
-			break;
-		case 6:
-			*buf = (char*)"saves/save3";
-			break;
-		}
-		f = fopen(*buf, "rb");
-		if (f != NULL)
-		{
-			f = fopen(*buf, "wb");
-			save = new Save;
-			save->minutes = 0;
-			save->hours = 0;
-			save->days = 0;
-			save->gold = 0;
-			save->order = *sel - 3;
-			save->charact = 0;
-			save->stats.dmgN = 0;
-			save->stats.dmgH = 0;
-			save->stats.evasion = 0;
-			save->stats.hp = 0;
-			save->stats.maxHP = 100;
-			save->stats.spValue = 0;
-			save->stats.block = 0;
-			save->stats.buffN = 0;
-			save->roomNum = 0;
-			save->roomType = 0;
-			save->enemyStats.enType = 0;
-			save->enemyStats.dmgN = 0;
-			save->enemyStats.dmgH = 0;
-			save->enemyStats.hp = 0;
-			save->enemyStats.maxHP = 0;
-			save->enemyStats.modAt = 0;
-			save->enemyStats.rewGold = 0;
-			save->enemyStats.spV = 0;
-			fwrite(save, sizeof(Save), 1, f);
-			delete save;
-			save = NULL;
-			fclose(f);
-		}
-		delete[] buf;
-		buf = nullptr;
-		return 0;
-	}
-	else if (IsKeyPressed(KEY_ENTER) && *sel >= 1 && *sel <= 3) return *sel;
-	else if (IsKeyPressed(KEY_ENTER) && *sel >= 4 && *sel <= 6)
-	{
+
 		buf = new char* [12];
 		*buf = (char*)"";
 		switch (*sel)
@@ -346,9 +317,10 @@ int SelectionMenu(Info** i, int *sel)
 		}
 		delete[] buf;
 		buf = nullptr;
-		return 0;
+		return 4;
 	}
-	else return 0;
+	else if (IsKeyPressed(KEY_X)) return 0;
+	else return 4;
 }
 
 void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*))
@@ -360,7 +332,12 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 	static Hero* h;
 	static Enemy* en;
 	static short chooseH, room;
-	char **buf = new char* [12];
+	static Audio a2;
+	char** buf = new char* [15];
+	*buf = (char*)"src/sound1.mp3";
+	a2.setParameters(buf);
+	delete[] buf;
+	buf = new char* [12];
 	*buf = (char*)"";
 	switch (sv)
 	{
@@ -446,6 +423,7 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		DrawText("Press Enter to start", WIDTH / 2 - 175, HEIGHT / 2 - 200, 30, BLACK);
 		ClearBackground(SKYBLUE);
 		EndDrawing();
+		a2.update();
 		if (WindowShouldClose()) *shouldExit = true;
 	}
 	st = GetTime();
@@ -458,7 +436,7 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 			if (save->minutes == 60) save->hours++;
 			if (save->hours == 24) save->days++;
 		}
-		if (isReady) isReady = NextRoom(&h, &save, &st, shouldExit, *i);
+		if (isReady) isReady = NextRoom(&h, &save, &st, shouldExit, *i, &a2);
 		else if(!(*shouldExit))
 		{
 			BeginDrawing();
@@ -468,6 +446,7 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 			if (h->hp > 0) ClearBackground(SKYBLUE);
 			else ClearBackground(BLACK);
 			EndDrawing();
+			a2.update();
 		}
 		if (WindowShouldClose()) *shouldExit = true;
 	}
@@ -604,4 +583,69 @@ void CheckStartConditions(int argc, char** argv, bool* shouldExit)
 	if (*i != 5) *shouldExit = true;
 	delete i;
 	i = nullptr;
+}
+
+int StartMenu(Info** i, int* sel)
+{
+	static Vector2 mPos;
+	mPos = GetMousePosition();
+	BeginDrawing();
+	if (IsKeyPressed(KEY_DOWN) && *sel < 3)
+		(*sel)++;
+	if (IsKeyPressed(KEY_UP) && *sel > 1)
+		(*sel)--;
+	if (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+		&& mPos.y >= HEIGHT / 2 - 200 && mPos.y <= HEIGHT / 2 - 120) *sel = 1;
+	if (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+		&& mPos.y >= HEIGHT / 2 - 20 && mPos.y <= HEIGHT / 2 + 60) *sel = 2;
+	if (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+		&& mPos.y >= HEIGHT / 2 + 160 && mPos.y <= HEIGHT / 2 + 240) *sel = 3;
+	switch (*sel)
+	{
+	case 1:
+		DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 - 200, 300, 80, YELLOW);
+		break;
+	case 2:
+		DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 - 20, 300, 80, YELLOW);
+		break;
+	case 3:
+		DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 + 160, 300, 80, YELLOW);
+		break;
+	}
+
+	DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 - 200, 300, 80, BLACK);
+	DrawText("Start", WIDTH / 2 - 35, HEIGHT / 2 - 172, 24, BLACK);
+
+	DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 - 20, 300, 80, BLACK);
+	DrawText("Help", WIDTH / 2 - 20, HEIGHT / 2 + 8, 24, BLACK);
+
+	DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 + 160, 300, 80, BLACK);
+	DrawText("Exit", WIDTH / 2 - 20, HEIGHT / 2 + 188, 24, BLACK);
+
+	DrawText(TextFormat("Username: %s", (*i)->username), 50, 50, 30, BLACK);
+
+	DrawText("Made by Coltenus", WIDTH - 310, HEIGHT - 36, 34, BLACK);
+	ClearBackground(SKYBLUE);
+	EndDrawing();
+	if ((IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) && *sel == 1) return 4;
+	else if ((IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) && *sel == 2) return 5;
+	else if ((IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) && *sel == 3) return 6;
+	else return 0;
+}
+
+int HelpMenu()
+{
+	BeginDrawing();
+	DrawText("At first you have to choose one of there different characters.", WIDTH / 2 - 500, HEIGHT / 2 - 200, 30, BLACK);
+	DrawText("Then each next room generate randomly.", WIDTH / 2 - 500, HEIGHT / 2 - 160, 30, BLACK);
+	DrawText("Each enemy has two different attacks and one special action.", WIDTH / 2 - 500, HEIGHT / 2 - 120, 30, BLACK);
+	DrawText("Strength of enemy depends on number of room you reached", WIDTH / 2 - 500, HEIGHT / 2 - 80, 30, BLACK);
+	DrawText("Every boss located at each 15th room. At the first boss is the last.", WIDTH / 2 - 500, HEIGHT / 2 - 40, 30, BLACK);
+	DrawText("You have to beat him to finish the game.", WIDTH / 2 - 500, HEIGHT / 2, 30, BLACK);
+	DrawText("Press X to return", WIDTH / 2 - 120, HEIGHT / 2 + 150, 30, RED);
+	ClearBackground(GREEN);
+	EndDrawing();
+	if (IsKeyPressed(KEY_X)) return 0;
+	else if (WindowShouldClose()) return 6;
+	else return 5;
 }

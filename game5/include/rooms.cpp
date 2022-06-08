@@ -4,7 +4,7 @@
 #include "info.h"
 #include "common.h"
 
-bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st, bool isBoss)
+bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st, bool isBoss, Audio* a2)
 {
 	static unsigned short action, sel;
 	static bool confirmation;
@@ -60,7 +60,7 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			{
 				confirmation = true;
 			}
-			if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st);
+			if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st, a2);
 			if (IsKeyPressed(KEY_DOWN) && sel < 3)
 				sel++;
 			if (IsKeyPressed(KEY_UP) && sel > 1)
@@ -135,6 +135,7 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 
 			ClearBackground(WHITE);
 			EndDrawing();
+			(*a2).update();
 			if (WindowShouldClose()) shouldExit = true;
 			if (shouldExit) break;
 		}
@@ -178,7 +179,7 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 		else (*en)->Special(&res);
 		while(!IsKeyPressed(KEY_SPACE) && !IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 		{
-			if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st);
+			if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st, a2);
 			BeginDrawing();
 			if(res->hMiss) DrawText("Hero missed with", WIDTH / 2 - 85, HEIGHT / 2 - 300, 30, WHITE);
 			else DrawText("Hero has done", WIDTH / 2 - 80, HEIGHT / 2 - 300, 30, WHITE);
@@ -197,21 +198,22 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			if (!res->hMiss && res->hAct != 3) DrawText(TextFormat("and dealt %hu damage", res->hVal)
 				, WIDTH / 2 - 100, HEIGHT / 2 - 200, 30, WHITE);
 			else if(!res->hMiss) DrawText(TextFormat("and get %hu buff of this hero", res->hVal)
-				, WIDTH / 2 - 160, HEIGHT / 2 - 200, 30, WHITE);
+				, WIDTH / 2 - 170, HEIGHT / 2 - 200, 30, WHITE);
 			if ((*sv)->charact == 3 && res->hAct == 2)
 				DrawText(TextFormat("and gained shield by value of %d", res->hAdd)
 					, WIDTH / 2 - 200, HEIGHT / 2 - 150, 30, WHITE);
-			DrawText("Enemy", WIDTH / 2 - 20, HEIGHT / 2, 30, WHITE);
+			DrawText("Enemy", WIDTH / 2 - 20, HEIGHT / 2 - 50, 30, WHITE);
 			if (!res->enMiss && res->enAct != 3) DrawText(TextFormat("dealt %hu damage", res->enVal)
-				, WIDTH / 2 - 80, HEIGHT / 2 + 50, 30, WHITE);
+				, WIDTH / 2 - 80, HEIGHT / 2, 30, WHITE);
 			else if (!res->enMiss) DrawText(TextFormat("healed by value of %d", res->enVal)
-				, WIDTH / 2 - 110, HEIGHT / 2 + 50, 30, WHITE);
+				, WIDTH / 2 - 110, HEIGHT / 2, 30, WHITE);
 			else if(res->enMiss && res->enAct != 3) DrawText("missed"
-				, WIDTH / 2 - 25, HEIGHT / 2 + 50, 30, WHITE);
-			else DrawText("couldn't heal" , WIDTH / 2 - 60, HEIGHT / 2 + 50, 30, WHITE);
-			DrawText("Press Space to continue", WIDTH / 2 - 150, HEIGHT / 2 + 200, 30, WHITE);
+				, WIDTH / 2 - 25, HEIGHT / 2, 30, WHITE);
+			else DrawText("couldn't heal" , WIDTH / 2 - 60, HEIGHT / 2, 30, WHITE);
+			DrawText("Press Space to continue", WIDTH / 2 - 150, HEIGHT / 2 + 150, 30, WHITE);
 			ClearBackground(DARKBLUE);
 			EndDrawing();
+			(*a2).update();
 			if (WindowShouldClose()) shouldExit = true;
 			if (shouldExit) break;
 		}
@@ -228,7 +230,7 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 	else return false;
 }
 
-bool Shop(Hero** h, Save** sv, double* st, Info* inf)
+bool Shop(Hero** h, Save** sv, double* st, Info* inf, Audio* a2)
 {
 	static bool shouldExit;
 	static short sel;
@@ -277,7 +279,7 @@ bool Shop(Hero** h, Save** sv, double* st, Info* inf)
 			if ((*sv)->minutes == 60) (*sv)->hours++;
 			if ((*sv)->hours == 24) (*sv)->days++;
 		}
-		if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st);
+		if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st, a2);
 		if (IsKeyPressed(KEY_RIGHT) && sel < 5)
 			sel++;
 		if (IsKeyPressed(KEY_LEFT) && sel > 1)
@@ -348,6 +350,7 @@ bool Shop(Hero** h, Save** sv, double* st, Info* inf)
 
 		ClearBackground(WHITE);
 		EndDrawing();
+		(*a2).update();
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || IsKeyPressed(KEY_ENTER))
 		{
 			switch (sel)
@@ -411,7 +414,7 @@ bool Shop(Hero** h, Save** sv, double* st, Info* inf)
 	else return false;
 }
 
-bool RestRoom(Hero** h, Save** sv, double* st, Info* inf)
+bool RestRoom(Hero** h, Save** sv, double* st, Info* inf, Audio* a2)
 {
 	static short sel;
 	static bool confirmation;
@@ -432,7 +435,7 @@ bool RestRoom(Hero** h, Save** sv, double* st, Info* inf)
 			if ((*sv)->hours == 24) (*sv)->days++;
 		}
 		mPos = GetMousePosition();
-		if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st);
+		if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st, a2);
 		if (shouldExit) break;
 		if (IsKeyPressed(KEY_ENTER)
 			|| IsMouseButtonPressed(MOUSE_BUTTON_LEFT)
@@ -477,6 +480,7 @@ bool RestRoom(Hero** h, Save** sv, double* st, Info* inf)
 
 		ClearBackground(WHITE);
 		EndDrawing();
+		(*a2).update();
 		if (WindowShouldClose()) shouldExit = true;
 	}
 	if (shouldExit)
@@ -514,11 +518,12 @@ bool RestRoom(Hero** h, Save** sv, double* st, Info* inf)
 	}
 	while (!IsKeyPressed(KEY_SPACE) && !IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
 	{
-		if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st);
+		if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st, a2);
 		BeginDrawing();
 		DrawText("Press Space to continue", WIDTH / 2 - 150, HEIGHT / 2 - 200, 30, BLACK);
 		ClearBackground(DARKBLUE);
 		EndDrawing();
+		(*a2).update();
 	}
 	UnloadTexture(bg);
 	return false;

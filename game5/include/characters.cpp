@@ -270,7 +270,7 @@ Paladin::Paladin()
 	minNDMG = 20;
 	nA = new char* [12];
 	*nA = (char*)"Sword swing";
-	minHDMG = 10;
+	minHDMG = 14;
 	hA = new char* [14];
 	*hA = (char*)"Shield attack";
 	spValue = 15;
@@ -317,7 +317,7 @@ void Paladin::HeavyAttack(ROB** res, Enemy** e)
 		(*res)->hMiss = false;
 	}
 	else (*res)->hMiss = true;
-	(*res)->hAdd = (short)minHDMG / 2;
+	(*res)->hAdd = (short)minHDMG * 0.3;
 	block += (*res)->hAdd;
 }
 

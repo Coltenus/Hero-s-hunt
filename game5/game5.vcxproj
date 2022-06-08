@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="include\audio.cpp" />
     <ClCompile Include="include\characters.cpp" />
     <ClCompile Include="include\chooseRoom.cpp" />
     <ClCompile Include="include\info.cpp" />
@@ -36,6 +37,7 @@
     <Text Include="..\smth_related\plans.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\audio.h" />
     <ClInclude Include="include\characters.h" />
     <ClInclude Include="include\chooseRoom.h" />
     <ClInclude Include="include\common.h" />

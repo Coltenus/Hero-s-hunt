@@ -3,8 +3,5 @@ new monsters
 next floor(new bg, new monsters)
 icons of battle values
 
-help menu
-start menu
-
 temporary abilities
 items
