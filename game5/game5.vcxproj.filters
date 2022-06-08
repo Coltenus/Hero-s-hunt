@@ -18,35 +18,18 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="characters.cpp">
+    <ClCompile Include="include\characters.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="chooseRoom.cpp">
+    <ClCompile Include="include\chooseRoom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="rooms.cpp">
+    <ClCompile Include="include\info.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="info.cpp">
+    <ClCompile Include="include\rooms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="characters.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="chooseRoom.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rooms.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="info.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="msvcp140d.dll">
@@ -69,5 +52,22 @@
     <Text Include="..\smth_related\plans.txt">
       <Filter>Resource Files</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\characters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\chooseRoom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\info.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rooms.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

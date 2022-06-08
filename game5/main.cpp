@@ -7,9 +7,9 @@ using namespace std;
 
 #define DEBUG
 
-#include "common.h"
-#include "characters.h"
-#include "chooseRoom.h"
+#include "include/common.h"
+#include "include/characters.h"
+#include "include/chooseRoom.h"
 
 void FillFile();
 void EnterUsername(Info**, bool*);

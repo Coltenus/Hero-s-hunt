@@ -1,5 +1,4 @@
 shopkeeper animation
-palladin
 new monsters
 next floor(new bg, new monsters)
 icons of battle values
