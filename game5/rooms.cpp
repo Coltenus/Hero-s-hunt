@@ -70,7 +70,8 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			if (mPos.x >= 40 && mPos.x <= 220
 				&& mPos.y >= HEIGHT / 2 + 120 && mPos.y <= HEIGHT / 2 + 180) sel = 2;
 			if (mPos.x >= 40 && mPos.x <= 220
-				&& mPos.y >= HEIGHT / 2 + 220 && mPos.y <= HEIGHT / 2 + 280) sel = 3;
+				&& mPos.y >= HEIGHT / 2 + 220 && mPos.y <= HEIGHT / 2 + 280
+				&& !((*sv)->charact == 3 && (*h)->buffsN != 0)) sel = 3;
 			BeginDrawing();
 			DrawTexture(bg, 0, 0, WHITE);
 			switch (sel)
@@ -82,10 +83,12 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 				DrawRectangle(40, HEIGHT / 2 + 120, 180, 60, YELLOW);
 				break;
 			case 3:
-				DrawRectangle(40, HEIGHT / 2 + 220, 180, 60, YELLOW);
+				if(!((*sv)->charact == 3 && (*h)->buffsN != 0)) DrawRectangle(40, HEIGHT / 2 + 220, 180, 60, YELLOW);
 				break;
 			}
 			DrawRectangleLines(20, HEIGHT / 2, WIDTH - 40, HEIGHT / 2 - 20, WHITE);
+
+			if ((*sv)->charact == 3 && (*h)->buffsN != 0) DrawRectangle(40, HEIGHT / 2 + 220, 180, 60, DARKGRAY);
 
 			DrawRectangleLines(40, HEIGHT / 2 + 20, 180, 60, WHITE);
 			DrawText(*((*h)->nA), 45, HEIGHT / 2 + 38, 24, WHITE);
@@ -100,7 +103,7 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			switch ((*sv)->charact)
 			{
 			case 1:
-				DrawText("Warrior", 250, HEIGHT / 2 + 60, 24, WHITE);
+				DrawText("Swordsman", 250, HEIGHT / 2 + 60, 24, WHITE);
 				break;
 			case 2:
 				DrawText("Archer", 250, HEIGHT / 2 + 60, 24, WHITE);
@@ -158,6 +161,7 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			else (*r)->evasion = 0;
 			if ((*sv)->charact == 1)(*r)->spValue = rand() % 4;
 			else if ((*sv)->charact == 2) (*r)->spValue = 0;
+			else if ((*sv)->charact == 3) (*r)->spValue = rand() % 2;
 			(*h)->gold += (*r)->gold;
 			(*h)->hp += (*r)->hp;
 			(*h)->maxHP += (*r)->hp;
@@ -181,27 +185,30 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			switch (res->hAct)
 			{
 			case 1:
-				DrawText(*((*h)->nA), WIDTH / 2 - 65, HEIGHT / 2 - 200, 30, WHITE);
+				DrawText(*((*h)->nA), WIDTH / 2 - 65, HEIGHT / 2 - 250, 30, WHITE);
 				break;
 			case 2:
-				DrawText(*((*h)->hA), WIDTH / 2 - 65, HEIGHT / 2 - 200, 30, WHITE);
+				DrawText(*((*h)->hA), WIDTH / 2 - 65, HEIGHT / 2 - 250, 30, WHITE);
 				break;
 			case 3:
-				DrawText(*((*h)->sp), WIDTH / 2 - 65, HEIGHT / 2 - 200, 30, WHITE);
+				DrawText(*((*h)->sp), WIDTH / 2 - 65, HEIGHT / 2 - 250, 30, WHITE);
 				break;
 			}
 			if (!res->hMiss && res->hAct != 3) DrawText(TextFormat("and dealt %hu damage", res->hVal)
-				, WIDTH / 2 - 100, HEIGHT / 2 - 100, 30, WHITE);
+				, WIDTH / 2 - 100, HEIGHT / 2 - 200, 30, WHITE);
 			else if(!res->hMiss) DrawText(TextFormat("and get %hu buff of this hero", res->hVal)
-				, WIDTH / 2 - 160, HEIGHT / 2 - 100, 30, WHITE);
+				, WIDTH / 2 - 160, HEIGHT / 2 - 200, 30, WHITE);
+			if ((*sv)->charact == 3 && res->hAct == 2)
+				DrawText(TextFormat("and gained shield by value of %d", res->hAdd)
+					, WIDTH / 2 - 200, HEIGHT / 2 - 150, 30, WHITE);
 			DrawText("Enemy", WIDTH / 2 - 20, HEIGHT / 2, 30, WHITE);
 			if (!res->enMiss && res->enAct != 3) DrawText(TextFormat("dealt %hu damage", res->enVal)
-				, WIDTH / 2 - 80, HEIGHT / 2 + 100, 30, WHITE);
+				, WIDTH / 2 - 80, HEIGHT / 2 + 50, 30, WHITE);
 			else if (!res->enMiss) DrawText(TextFormat("healed by value of %d", res->enVal)
-				, WIDTH / 2 - 110, HEIGHT / 2 + 100, 30, WHITE);
+				, WIDTH / 2 - 110, HEIGHT / 2 + 50, 30, WHITE);
 			else if(res->enMiss && res->enAct != 3) DrawText("missed"
-				, WIDTH / 2 - 25, HEIGHT / 2 + 100, 30, WHITE);
-			else DrawText("couldn't heal" , WIDTH / 2 - 60, HEIGHT / 2 + 100, 30, WHITE);
+				, WIDTH / 2 - 25, HEIGHT / 2 + 50, 30, WHITE);
+			else DrawText("couldn't heal" , WIDTH / 2 - 60, HEIGHT / 2 + 50, 30, WHITE);
 			DrawText("Press Space to continue", WIDTH / 2 - 150, HEIGHT / 2 + 200, 30, WHITE);
 			ClearBackground(DARKBLUE);
 			EndDrawing();
@@ -236,12 +243,12 @@ bool Shop(Hero** h, Save** sv, double* st, Info* inf)
 	for (i = 0; i < 5; i++) isActive[i] = true;
 	value[0] = rand() % 15 + 5;
 	price[0] = value[0];
-	value[1] = rand() % 8 + 4;
+	value[1] = rand() % 6 + 4;
 	price[1] = value[1] * 3;
-	value[2] = rand() % 8 + 4;
+	value[2] = rand() % 6 + 4;
 	price[2] = value[2] * 3;
 	value[3] = rand() % 4 + 1;
-	price[3] = value[3] * 10;
+	price[3] = value[3] * 8;
 	if ((*sv)->charact == 1)
 	{
 		value[4] = rand() % 5 + 5;
@@ -251,6 +258,11 @@ bool Shop(Hero** h, Save** sv, double* st, Info* inf)
 	{
 		value[4] = 1;
 		price[4] = value[4] * 40;
+	}
+	else if ((*sv)->charact == 3)
+	{
+		value[4] = rand() % 4 + 1;
+		price[4] = value[4] * 10;
 	}
 	if ((*h)->evasion >= 60) isActive[3] = false;
 	sel = 0;
@@ -495,7 +507,8 @@ bool RestRoom(Hero** h, Save** sv, double* st, Info* inf)
 			if((*h)->evasion < 60) (*h)->evasion += 1;
 			break;
 		case 5:
-			if((*sv)->charact != 2)(*h)->spValue += rand() % 4 + 1;
+			if ((*sv)->charact == 1)(*h)->spValue += rand() % 3 + 1;
+			else if ((*sv)->charact == 3) (*h)->spValue += 1;
 			break;
 		}
 	}

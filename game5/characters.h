@@ -39,11 +39,11 @@ public:
 	int spValue;
 };
 
-class Warrior : public Hero
+class Swordsman : public Hero
 {
 public:
-	Warrior();
-	~Warrior();
+	Swordsman();
+	~Swordsman();
 	void Attack(ROB**, Enemy**) override;
 	void HeavyAttack(ROB**, Enemy**) override;
 	void Special(ROB**) override;
@@ -59,11 +59,21 @@ public:
 	void Special(ROB**) override;
 };
 
-class  Archer : public Hero
+class Archer : public Hero
 {
 public:
 	Archer();
 	~Archer();
+	void Attack(ROB**, Enemy**) override;
+	void HeavyAttack(ROB**, Enemy**) override;
+	void Special(ROB**) override;
+};
+
+class Paladin : public Hero
+{
+public:
+	Paladin();
+	~Paladin();
 	void Attack(ROB**, Enemy**) override;
 	void HeavyAttack(ROB**, Enemy**) override;
 	void Special(ROB**) override;

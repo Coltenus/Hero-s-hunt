@@ -13,7 +13,7 @@ typedef struct _save
 {
 	struct chOfStats
 	{
-		short dmgN, dmgH, hp, maxHP, evasion, spValue;
+		short dmgN, dmgH, hp, maxHP, evasion, spValue, buffN, block;
 	};
 	struct enSt
 	{
@@ -36,6 +36,6 @@ typedef struct _info
 
 typedef struct _resultOfBattle
 {
-	unsigned short hAct, enAct, hVal, enVal;
+	unsigned short hAct, enAct, hVal, enVal, hAdd, enAdd;
 	bool hMiss, enMiss;
 }ROB;

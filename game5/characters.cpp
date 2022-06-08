@@ -55,7 +55,7 @@ Enemy::~Enemy()
 
 }
 
-Warrior::Warrior()
+Swordsman::Swordsman()
 {
 
 	minNDMG = 10;
@@ -70,11 +70,11 @@ Warrior::Warrior()
 	maxHP = 100;
 	hp = 100;
 	gold = 0;
-	evasion = 15;
+	evasion = 18;
 	buffsN = 0;
 }
 
-Warrior::~Warrior()
+Swordsman::~Swordsman()
 {
 	delete[] nA;
 	delete[] hA;
@@ -84,7 +84,7 @@ Warrior::~Warrior()
 	sp = nullptr;
 }
 
-void Warrior::Attack(ROB** res, Enemy** e)
+void Swordsman::Attack(ROB** res, Enemy** e)
 {
 	(*res)->hAct = 1;
 	(*res)->hVal = rand() % 10 + minNDMG;
@@ -96,7 +96,7 @@ void Warrior::Attack(ROB** res, Enemy** e)
 	else (*res)->hMiss = true;
 }
 
-void Warrior::HeavyAttack(ROB** res, Enemy** e)
+void Swordsman::HeavyAttack(ROB** res, Enemy** e)
 {
 	(*res)->hAct = 2;
 	(*res)->hVal = rand() % 10 + minHDMG;
@@ -108,7 +108,7 @@ void Warrior::HeavyAttack(ROB** res, Enemy** e)
 	else (*res)->hMiss = true;
 }
 
-void Warrior::Special(ROB** res)
+void Swordsman::Special(ROB** res)
 {
 	(*res)->hAct = 3;
 	block += spValue;
@@ -207,7 +207,7 @@ Archer::Archer()
 	maxHP = 80;
 	hp = 80;
 	gold = 0;
-	evasion = 25;
+	evasion = 26;
 	buffsN = 0;
 }
 
@@ -263,4 +263,70 @@ void Archer::Special(ROB** res)
 	buffsN += spValue;
 	(*res)->hVal = spValue;
 	(*res)->hMiss = false;
+}
+
+Paladin::Paladin()
+{
+	minNDMG = 20;
+	nA = new char* [12];
+	*nA = (char*)"Sword swing";
+	minHDMG = 10;
+	hA = new char* [14];
+	*hA = (char*)"Shield attack";
+	spValue = 15;
+	sp = new char* [15];
+	*sp = (char*)"God's blessing";
+	maxHP = 100;
+	hp = 100;
+	gold = 0;
+	evasion = 10;
+	buffsN = 0;
+}
+
+Paladin::~Paladin()
+{
+	delete[] nA;
+	delete[] hA;
+	delete[] sp;
+	nA = nullptr;
+	hA = nullptr;
+	sp = nullptr;
+}
+
+void Paladin::Attack(ROB** res, Enemy** e)
+{
+	if (buffsN > 0) buffsN--;
+	(*res)->hAct = 1;
+	(*res)->hVal = rand() % 5 + minNDMG;
+	if (rand() % 100 + 1 > 25)
+	{
+		(*e)->hp -= (*res)->hVal;
+		(*res)->hMiss = false;
+	}
+	else (*res)->hMiss = true;
+}
+
+void Paladin::HeavyAttack(ROB** res, Enemy** e)
+{
+	if (buffsN > 0) buffsN--;
+	(*res)->hAct = 2;
+	(*res)->hVal = minHDMG;
+	if (rand() % 100 + 1 > 25)
+	{
+		(*e)->hp -= (*res)->hVal;
+		(*res)->hMiss = false;
+	}
+	else (*res)->hMiss = true;
+	(*res)->hAdd = (short)minHDMG / 2;
+	block += (*res)->hAdd;
+}
+
+void Paladin::Special(ROB** res)
+{
+	(*res)->hVal = rand() % (spValue + 1);
+	hp += (*res)->hVal;
+	if (hp > maxHP) hp = maxHP;
+	(*res)->hAct = 3;
+	(*res)->hMiss = false;
+	buffsN = 3;
 }

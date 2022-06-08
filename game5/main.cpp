@@ -272,6 +272,8 @@ int SelectionMenu(Info** i, int *sel)
 			save->stats.hp = 0;
 			save->stats.maxHP = 100;
 			save->stats.spValue = 0;
+			save->stats.block = 0;
+			save->stats.buffN = 0;
 			save->roomNum = 0;
 			save->roomType = 0;
 			save->enemyStats.enType = 0;
@@ -325,6 +327,8 @@ int SelectionMenu(Info** i, int *sel)
 			save->stats.hp = 0;
 			save->stats.maxHP = 100;
 			save->stats.spValue = 0;
+			save->stats.block = 0;
+			save->stats.buffN = 0;
 			save->roomNum = 0;
 			save->roomType = 0;
 			save->enemyStats.enType = 0;
@@ -390,6 +394,8 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		save->stats.hp = 0;
 		save->stats.maxHP = 100;
 		save->stats.spValue = 0;
+		save->stats.block = 0;
+		save->stats.buffN = 0;
 		save->roomNum = 0;
 		save->roomType = 0;
 		save->enemyStats.enType = 0;
@@ -412,13 +418,13 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 	switch (save->charact)
 	{
 	case 1:
-		h = new Warrior;
+		h = new Swordsman;
 		break;
 	case 2:
 		h = new Archer;
 		break;
 	case 3:
-		//h = new Palladin;
+		h = new Paladin;
 		break;
 	}
 	if (save->stats.hp != 0)
@@ -429,6 +435,8 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		h->minHDMG = save->stats.dmgH;
 		h->spValue = save->stats.spValue;
 		h->evasion = save->stats.evasion;
+		h->block = save->stats.block;
+		h->buffsN = save->stats.buffN;
 		h->gold = save->gold;
 	}
 	fclose(f);
@@ -477,6 +485,8 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		save->stats.hp = 0;
 		save->stats.maxHP = 100;
 		save->stats.spValue = 0;
+		save->stats.block = 0;
+		save->stats.buffN = 0;
 		save->roomNum = 0;
 		save->enemyStats.enType = 0;
 		save->enemyStats.dmgN = 0;
@@ -496,6 +506,8 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		save->stats.dmgH = h->minHDMG;
 		save->stats.spValue = h->spValue;
 		save->stats.evasion = h->evasion;
+		save->stats.block = h->block;
+		save->stats.buffN = h->buffsN;
 		save->gold = h->gold;
 		if (shouldExit) save->roomNum--;
 		fwrite(save, sizeof(Save), 1, f);
@@ -553,13 +565,13 @@ short SelectHero(short* sel, bool* shouldExit)
 	DrawText("Choose Hero", WIDTH / 2 - 110, HEIGHT / 2 - 320, 30, WHITE);
 
 	DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 - 200, 300, 80, WHITE);
-	DrawText("Warrior", WIDTH / 2 - 40, HEIGHT / 2 - 172, 24, WHITE);
+	DrawText("Swordsman", WIDTH / 2 - 65, HEIGHT / 2 - 172, 24, WHITE);
 
 	DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 - 20, 300, 80, WHITE);
 	DrawText("Archer", WIDTH / 2 - 40, HEIGHT / 2 + 8, 24, WHITE);
 
 	DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 + 160, 300, 80, WHITE);
-	DrawText("Palladin", WIDTH / 2 - 40, HEIGHT / 2 + 188, 24, WHITE);
+	DrawText("Paladin", WIDTH / 2 - 40, HEIGHT / 2 + 188, 24, WHITE);
 
 	ClearBackground(DARKBLUE);
 	EndDrawing();
