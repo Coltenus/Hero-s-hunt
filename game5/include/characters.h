@@ -17,9 +17,9 @@ public:
 public:
 	char** nA, ** hA, ** sp;
 	short maxHP, hp, block, evasion, buffsN;
-	int minNDMG;
-	int minHDMG;
-	int spValue;
+	short minNDMG, mcN;
+	short minHDMG, mcH;
+	short spValue;
 	unsigned short gold;
 };
 

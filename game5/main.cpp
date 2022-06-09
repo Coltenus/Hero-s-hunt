@@ -451,7 +451,7 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		if (WindowShouldClose()) *shouldExit = true;
 	}
 	f = fopen(*buf, "rb+");
-	if (h->hp <= 0 || save->roomNum == 10 && h->hp > 0)
+	if (h != nullptr && (h->hp <= 0 || save->roomNum == 10 && h->hp > 0))
 	{
 		save->minutes = 0;
 		save->hours = 0;
@@ -517,6 +517,7 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 short SelectHero(short* sel, bool* shouldExit)
 {
 	static Vector2 mPos;
+	static Hero* h;
 	mPos = GetMousePosition();
 	if (IsKeyPressed(KEY_DOWN) && *sel < 3)
 		(*sel)++;
@@ -532,12 +533,15 @@ short SelectHero(short* sel, bool* shouldExit)
 	switch (*sel)
 	{
 	case 1:
+		h = new Swordsman;
 		DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 - 200, 300, 80, YELLOW);
 		break;
 	case 2:
+		h = new Archer;
 		DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 - 20, 300, 80, YELLOW);
 		break;
 	case 3:
+		h = new Paladin;
 		DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 + 160, 300, 80, YELLOW);
 		break;
 	}
@@ -551,6 +555,26 @@ short SelectHero(short* sel, bool* shouldExit)
 
 	DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 + 160, 300, 80, WHITE);
 	DrawText("Paladin", WIDTH / 2 - 40, HEIGHT / 2 + 188, 24, WHITE);
+
+	if (h != nullptr)
+	{
+		DrawText(*(h->nA), WIDTH / 2 + 200, HEIGHT / 2 - 260, 30, WHITE);
+		DrawText(TextFormat("Minimal DMG: %d", h->minNDMG), WIDTH / 2 + 200, HEIGHT / 2 - 220, 30, WHITE);
+		DrawText(TextFormat("Miss chance: %d%%", h->mcN), WIDTH / 2 + 200, HEIGHT / 2 - 180, 30, WHITE);
+
+		DrawText(*(h->hA), WIDTH / 2 + 200, HEIGHT / 2 - 60, 30, WHITE);
+		DrawText(TextFormat("Minimal DMG: %d", h->minHDMG), WIDTH / 2 + 200, HEIGHT / 2 - 20, 30, WHITE);
+		DrawText(TextFormat("Miss chance: %d%%", h->mcH), WIDTH / 2 + 200, HEIGHT / 2 + 20, 30, WHITE);
+		if(*sel == 2)DrawText("Do three independent attacks", WIDTH / 2 + 200, HEIGHT / 2 + 60, 30, WHITE);
+		else if(*sel == 3) DrawText("As block gain 30% of\nminimal DMG value", WIDTH / 2 + 200, HEIGHT / 2 + 60, 30, WHITE);
+
+		DrawText(*(h->sp), WIDTH / 2 + 200, HEIGHT / 2 + 220, 30, WHITE);
+		DrawText(TextFormat("Special value: %d", h->spValue), WIDTH / 2 + 200, HEIGHT / 2 + 260, 30, WHITE);
+		if(*sel == 3) DrawText("Randomly heal by a value\nfrom 1 to special value", WIDTH / 2 + 200, HEIGHT / 2 + 300, 30, WHITE);
+
+		delete h;
+		h = nullptr;
+	}
 
 	ClearBackground(DARKBLUE);
 	EndDrawing();

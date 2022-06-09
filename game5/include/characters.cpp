@@ -17,6 +17,8 @@ Hero::Hero()
 	minHDMG = 0;
 	spValue = 0;
 	gold = 0;
+	mcN = 0;
+	mcH = 0;
 }
 
 Hero::~Hero()
@@ -57,11 +59,12 @@ Enemy::~Enemy()
 
 Swordsman::Swordsman()
 {
-
 	minNDMG = 10;
+	mcN = 20;
 	nA = new char*[13];
 	*nA = (char*)"Sword attack";
 	minHDMG = 30;
+	mcH = 35;
 	hA = new char*[12];
 	*hA = (char*)"Sword swing";
 	spValue = 15;
@@ -88,7 +91,7 @@ void Swordsman::Attack(ROB** res, Enemy** e)
 {
 	(*res)->hAct = 1;
 	(*res)->hVal = rand() % 10 + minNDMG;
-	if (rand() % 100 + 1 > 20)
+	if (rand() % 100 + 1 > mcN)
 	{
 		(*e)->hp -= (*res)->hVal;
 		(*res)->hMiss = false;
@@ -100,7 +103,7 @@ void Swordsman::HeavyAttack(ROB** res, Enemy** e)
 {
 	(*res)->hAct = 2;
 	(*res)->hVal = rand() % 10 + minHDMG;
-	if (rand() % 100 + 1 > 35)
+	if (rand() % 100 + 1 > mcH)
 	{
 		(*e)->hp -= (*res)->hVal;
 		(*res)->hMiss = false;
@@ -196,9 +199,11 @@ void Zombie::Special(ROB** res)
 Archer::Archer()
 {
 	minNDMG = 5;
+	mcN = 30;
 	nA = new char*[12];
 	*nA = (char*)"Triple shot";
 	minHDMG = 20;
+	mcH = 0;
 	hA = new char*[14];
 	*hA = (char*)"Accurate shot";
 	spValue = 1;
@@ -233,7 +238,7 @@ void Archer::Attack(ROB** res, Enemy** e)
 	*i = 0;
 	while (*i < 3)
 	{
-		if (rand() % 100 + 1 > 30)
+		if (rand() % 100 + 1 > mcN)
 		{
 			(*res)->hVal += rand() % 6 + minNDMG;
 			fl = true;
@@ -268,9 +273,11 @@ void Archer::Special(ROB** res)
 Paladin::Paladin()
 {
 	minNDMG = 20;
+	mcN = 25;
 	nA = new char* [12];
 	*nA = (char*)"Sword swing";
 	minHDMG = 14;
+	mcH = 15;
 	hA = new char* [14];
 	*hA = (char*)"Shield attack";
 	spValue = 15;
@@ -298,7 +305,7 @@ void Paladin::Attack(ROB** res, Enemy** e)
 	if (buffsN > 0) buffsN--;
 	(*res)->hAct = 1;
 	(*res)->hVal = rand() % 5 + minNDMG;
-	if (rand() % 100 + 1 > 25)
+	if (rand() % 100 + 1 > mcN)
 	{
 		(*e)->hp -= (*res)->hVal;
 		(*res)->hMiss = false;
@@ -311,13 +318,13 @@ void Paladin::HeavyAttack(ROB** res, Enemy** e)
 	if (buffsN > 0) buffsN--;
 	(*res)->hAct = 2;
 	(*res)->hVal = minHDMG;
-	if (rand() % 100 + 1 > 25)
+	if (rand() % 100 + 1 > mcH)
 	{
 		(*e)->hp -= (*res)->hVal;
 		(*res)->hMiss = false;
 	}
 	else (*res)->hMiss = true;
-	(*res)->hAdd = (short)minHDMG * 0.3;
+	(*res)->hAdd = (short)(minHDMG * 0.3);
 	block += (*res)->hAdd;
 }
 
