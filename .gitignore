@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/game5/saves/info
+/game5/saves/save1
+/game5/saves/save2
+/game5/saves/save3
