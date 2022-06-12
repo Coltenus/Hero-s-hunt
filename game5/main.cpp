@@ -16,8 +16,9 @@ using namespace std;
 void FillFile();
 void EnterUsername(Info**, bool*);
 int SelectionMenu(Info**, int*);
-void GameProcess(Info**, int, bool*, short (*)(short*, bool*));
+void GameProcess(Info**, int, bool*, short (*)(short*, bool*), short (*)(short, bool*));
 short SelectHero(short*, bool*);
+short SelectAbility(short, bool*);
 void CheckStartConditions(int, char**, bool*);
 int StartMenu(Info**, int*);
 int HelpMenu();
@@ -80,7 +81,7 @@ int main(int argc, char** argv)
 				break;
 			case 1:
 				a1.stop();
-				GameProcess(&inf, 1, &shouldExit, SelectHero);
+				GameProcess(&inf, 1, &shouldExit, SelectHero, SelectAbility);
 				a1.start();
 				shouldExit = false;
 				curSave = 0;
@@ -88,7 +89,7 @@ int main(int argc, char** argv)
 				break;
 			case 2:
 				a1.stop();
-				GameProcess(&inf, 2, &shouldExit, SelectHero);
+				GameProcess(&inf, 2, &shouldExit, SelectHero, SelectAbility);
 				a1.start();
 				shouldExit = false;
 				curSave = 0;
@@ -96,7 +97,7 @@ int main(int argc, char** argv)
 				break;
 			case 3:
 				a1.stop();
-				GameProcess(&inf, 3, &shouldExit, SelectHero);
+				GameProcess(&inf, 3, &shouldExit, SelectHero, SelectAbility);
 				a1.start();
 				shouldExit = false;
 				curSave = 0;
@@ -292,6 +293,7 @@ int SelectionMenu(Info** i, int *sel)
 			save->gold = 0;
 			save->order = *sel - 3;
 			save->charact = 0;
+			save->ability = 0;
 			save->stats.dmgN = 0;
 			save->stats.dmgH = 0;
 			save->stats.evasion = 0;
@@ -300,6 +302,8 @@ int SelectionMenu(Info** i, int *sel)
 			save->stats.spValue = 0;
 			save->stats.block = 0;
 			save->stats.buffN = 0;
+			save->stats.curDelay = 0;
+			save->enemyStats.modIM = 0;
 			save->roomNum = 0;
 			save->roomType = 0;
 			save->enemyStats.enType = 0;
@@ -323,7 +327,7 @@ int SelectionMenu(Info** i, int *sel)
 	else return 4;
 }
 
-void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*))
+void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*), short (*selAb)(short, bool*))
 {
 	static double st;
 	static bool isReady;
@@ -365,6 +369,7 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		save->gold = 0;
 		save->order = sv;
 		save->charact = 0;
+		save->ability = 0;
 		save->stats.dmgN = 0;
 		save->stats.dmgH = 0;
 		save->stats.evasion = 0;
@@ -373,6 +378,8 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		save->stats.spValue = 0;
 		save->stats.block = 0;
 		save->stats.buffN = 0;
+		save->stats.curDelay = 0;
+		save->enemyStats.modIM = 0;
 		save->roomNum = 0;
 		save->roomType = 0;
 		save->enemyStats.enType = 0;
@@ -392,16 +399,35 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 	{
 		save->charact = selH(&chooseH, shouldExit);
 	}
+	if(save->ability == 0 && !(*shouldExit)) save->ability = selAb(save->charact, shouldExit);
 	switch (save->charact)
 	{
 	case 1:
 		h = new Swordsman;
+		switch (save->ability)
+		{
+		case 1:
+			h->setAbility(new SwAb1);
+			break;
+		}
 		break;
 	case 2:
 		h = new Archer;
+		switch (save->ability)
+		{
+		case 1:
+			h->setAbility(new ArAb1);
+			break;
+		}
 		break;
 	case 3:
 		h = new Paladin;
+		switch (save->ability)
+		{
+		case 1:
+			h->setAbility(new PalAb1);
+			break;
+		}
 		break;
 	}
 	if (save->stats.hp != 0)
@@ -414,6 +440,7 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		h->evasion = save->stats.evasion;
 		h->block = save->stats.block;
 		h->buffsN = save->stats.buffN;
+		h->ability->curDelay = save->stats.curDelay;
 		h->gold = save->gold;
 	}
 	fclose(f);
@@ -458,6 +485,7 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		save->days = 0;
 		save->gold = 0;
 		save->charact = 0;
+		save->ability = 0;
 		save->stats.dmgN = 0;
 		save->stats.dmgH = 0;
 		save->stats.evasion = 0;
@@ -466,6 +494,8 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		save->stats.spValue = 0;
 		save->stats.block = 0;
 		save->stats.buffN = 0;
+		save->stats.curDelay = 0;
+		save->enemyStats.modIM = 0;
 		save->roomNum = 0;
 		save->enemyStats.enType = 0;
 		save->enemyStats.dmgN = 0;
@@ -487,8 +517,10 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		save->stats.evasion = h->evasion;
 		save->stats.block = h->block;
 		save->stats.buffN = h->buffsN;
+		if (h->ability != nullptr) save->stats.curDelay = h->ability->curDelay;
+		else save->stats.curDelay = 0;
 		save->gold = h->gold;
-		if (shouldExit) save->roomNum--;
+		if (shouldExit && save->roomNum > 0) save->roomNum--;
 		fwrite(save, sizeof(Save), 1, f);
 	}
 	fclose(f);
@@ -584,7 +616,150 @@ short SelectHero(short* sel, bool* shouldExit)
 		return 0;
 	}
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && *sel >= 1 && *sel <= 3) return *sel;
-	if (IsKeyPressed(KEY_ENTER)) return *sel;
+	if (IsKeyPressed(KEY_ENTER) && *sel >= 1 && *sel <= 3) return *sel;
+	else return 0;
+}
+
+short SelectAbility(short h, bool* shouldExit)
+{
+	static Vector2 mPos;
+	static Ability* ab1, *ab2, *ab3, *ab;
+	static short sel;
+	static bool confirm;
+	ab = nullptr;
+	confirm = false;
+	sel = 0;
+	switch (h)
+	{
+	case 1:
+		ab1 = new SwAb1;
+		ab2 = new SwAb1;
+		ab3 = new SwAb1;
+		break;
+	case 2:
+		ab1 = new ArAb1;
+		ab2 = new ArAb1;
+		ab3 = new ArAb1;
+		break;
+	case 3:
+		ab1 = new PalAb1;
+		ab2 = new PalAb1;
+		ab3 = new PalAb1;
+		break;
+	}
+	while (!confirm && !*(shouldExit))
+	{
+		mPos = GetMousePosition();
+		if (IsKeyPressed(KEY_DOWN) && sel < 3)
+			sel++;
+		if (IsKeyPressed(KEY_UP) && sel > 1)
+			sel--;
+		if (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+			&& mPos.y >= HEIGHT / 2 - 100 && mPos.y <= HEIGHT / 2 - 20) sel = 1;
+		if (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+			&& mPos.y >= HEIGHT / 2 + 80 && mPos.y <= HEIGHT / 2 + 140) sel = 2;
+		if (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+			&& mPos.y >= HEIGHT / 2 + 260 && mPos.y <= HEIGHT / 2 + 340) sel = 3;
+		if (IsKeyPressed(KEY_ENTER) && sel >= 1 && sel <= 3 || IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+			(mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+				&& mPos.y >= HEIGHT / 2 - 100 && mPos.y <= HEIGHT / 2 - 20))
+				//|| mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+				//&& mPos.y >= HEIGHT / 2 + 80 && mPos.y <= HEIGHT / 2 + 140
+				//|| mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+				//&& mPos.y >= HEIGHT / 2 + 260 && mPos.y <= HEIGHT / 2 + 340)) 
+				confirm = true;
+		BeginDrawing();
+		switch (sel)
+		{
+		case 1:
+			ab = ab1;
+			DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 - 100, 300, 80, YELLOW);
+			break;
+		case 2:
+			//ab = ab2;
+			DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 + 80, 300, 80, YELLOW);
+			break;
+		case 3:
+			//ab = ab3;
+			DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 + 260, 300, 80, YELLOW);
+			break;
+		}
+		DrawText("Choose Ability", WIDTH / 2 - 120, HEIGHT / 2 - 220, 30, WHITE);
+
+		DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 - 100, 300, 80, WHITE);
+		DrawText(*(ab1->abTitle), WIDTH / 2 - 75, HEIGHT / 2 - 72, 24, WHITE);
+
+		DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 + 80, 300, 80, WHITE);
+		DrawText("Not working", WIDTH / 2 - 75, HEIGHT / 2 + 108, 24, WHITE);
+
+		DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 + 260, 300, 80, WHITE);
+		DrawText("Not working", WIDTH / 2 - 75, HEIGHT / 2 + 288, 24, WHITE);
+
+		if (ab != nullptr)
+		{
+			DrawText(*(ab->abTitle), WIDTH / 2 + 200, HEIGHT / 2 - 100, 30, WHITE);
+			DrawText(TextFormat("Effect time in moves: %d", ab->abilityVal), WIDTH / 2 + 200, HEIGHT / 2 - 60, 30, WHITE);
+			DrawText(TextFormat("Cooldown in moves: %d", ab->maxDelay), WIDTH / 2 + 200, HEIGHT / 2 - 20, 30, WHITE);
+			switch (sel)
+			{
+			case 1:
+				switch (h)
+				{
+				case 1:
+					DrawText("Disarms the enemy", WIDTH / 2 + 200, HEIGHT / 2 + 20, 30, WHITE);
+					break;
+				case 2:
+					DrawText("Enemy loses 10% of\nhis maximum HP", WIDTH / 2 + 200, HEIGHT / 2 + 20, 30, WHITE);
+					break;
+				case 3:
+					DrawText("Enemy deals damage to\nhimself with a 65% chance", WIDTH / 2 + 200, HEIGHT / 2 + 20, 30, WHITE);
+					break;
+				}
+				break;
+			case 2:
+				switch (h)
+				{
+				case 1:
+					break;
+				case 2:
+					break;
+				case 3:
+					break;
+				}
+				break;
+			case 3:
+				switch (h)
+				{
+				case 1:
+					break;
+				case 2:
+					break;
+				case 3:
+					break;
+				}
+				break;
+			}
+		}
+
+		ClearBackground(DARKBLUE);
+		EndDrawing();
+		if (WindowShouldClose())
+		{
+			*shouldExit = true;
+		}
+	}
+
+
+	delete ab1;
+	delete ab2;
+	delete ab3;
+	ab1 = nullptr;
+	ab2 = nullptr;
+	ab3 = nullptr;
+	ab = nullptr;
+
+	if (*shouldExit) return 0;
+	if (confirm && sel >= 1 && sel <= 3) return 1;//sel;
 	else return 0;
 }
 

@@ -28,6 +28,7 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf, Audi
 		en->modAt = (*sv)->enemyStats.modAt;
 		en->rewGold = (*sv)->enemyStats.rewGold;
 		en->spValue = (*sv)->enemyStats.spV;
+		en->modInMoves = (*sv)->enemyStats.modIM;
 	}
 	if (isNewRoom && (*sv)->enemyStats.enType >= 1 && (*sv)->enemyStats.enType <= 100 && (*sv)->roomNum != 15) en = new Zombie((*sv)->roomNum);
 	if (isNewRoom && (*sv)->roomType == 0) (*sv)->roomType = rand() % 100 + 1;
@@ -114,6 +115,7 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf, Audi
 			(*sv)->enemyStats.modAt = en->modAt;
 			(*sv)->enemyStats.rewGold = en->rewGold;
 			(*sv)->enemyStats.spV = en->spValue;
+			(*sv)->enemyStats.modIM = en->modInMoves;
 		}
 		return false;
 	}
