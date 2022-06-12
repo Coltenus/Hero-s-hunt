@@ -3,5 +3,5 @@ new monsters
 next floor(new bg, new monsters)
 icons of battle values
 
-each hero has three unique abilities(player has to choose one)
+two other abilities for each hero
 temporary items and item slots
