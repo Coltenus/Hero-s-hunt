@@ -315,6 +315,10 @@ int SelectionMenu(Info** i, int *sel)
 			save->enemyStats.modAt = 0;
 			save->enemyStats.rewGold = 0;
 			save->enemyStats.spV = 0;
+			save->item1.val = 0;
+			save->item1.num = 0;
+			save->item2.val = 0;
+			save->item2.num = 0;
 			fwrite(save, sizeof(Save), 1, f);
 			delete save;
 			save = NULL;
@@ -392,6 +396,10 @@ void GameProcess(Info** i, int sv, bool* shouldExit, Hero* (*selH)(short*, bool*
 		save->enemyStats.modAt = 0;
 		save->enemyStats.rewGold = 0;
 		save->enemyStats.spV = 0;
+		save->item1.val = 0;
+		save->item1.num = 0;
+		save->item2.val = 0;
+		save->item2.num = 0;
 		fwrite(save, sizeof(Save), 1, f);
 		fclose(f);
 		f = fopen(*buf, "rb");
@@ -422,7 +430,10 @@ void GameProcess(Info** i, int sv, bool* shouldExit, Hero* (*selH)(short*, bool*
 		}
 	}
 	if (h == nullptr) *shouldExit = true;
-	if (h != nullptr) save->charact = h->charType;
+	if (h != nullptr)
+	{
+		save->charact = h->charType;
+	}
 	if (h != nullptr && save->ability == 0 && !(*shouldExit)) h->ability = selAb(save->charact, shouldExit);
 	else
 	{
@@ -487,6 +498,44 @@ void GameProcess(Info** i, int sv, bool* shouldExit, Hero* (*selH)(short*, bool*
 		h->ability->statusDur = save->stats.statDur;
 		h->ability->curDelay = save->stats.curDelay;
 		h->gold = save->gold;
+		if (save->item1.num != 0)
+		{
+			switch (save->item1.num)
+			{
+			case 1:
+				h->items[0] = new Healing(1);
+				break;
+			case 2:
+				h->items[0] = new Block(1);
+				break;
+			case 3:
+				h->items[0] = new DmgPotion(1);
+				break;
+			case 4:
+				h->items[0] = new UpMaxHP(1);
+				break;
+			}
+			h->items[0]->setVal(save->item1.val);
+		}
+		if (save->item2.num != 0)
+		{
+			switch (save->item2.num)
+			{
+			case 1:
+				h->items[1] = new Healing(1);
+				break;
+			case 2:
+				h->items[1] = new Block(1);
+				break;
+			case 3:
+				h->items[1] = new DmgPotion(1);
+				break;
+			case 4:
+				h->items[1] = new UpMaxHP(1);
+				break;
+			}
+			h->items[1]->setVal(save->item2.val);
+		}
 	}
 	fclose(f);
 	while (!IsKeyPressed(KEY_ENTER) && !IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !(*shouldExit))
@@ -551,6 +600,10 @@ void GameProcess(Info** i, int sv, bool* shouldExit, Hero* (*selH)(short*, bool*
 		save->enemyStats.modAt = 0;
 		save->enemyStats.rewGold = 0;
 		save->enemyStats.spV = 0;
+		save->item1.val = 0;
+		save->item1.num = 0;
+		save->item2.val = 0;
+		save->item2.num = 0;
 		fwrite(save, sizeof(Save), 1, f);
 	}
 	else if (save != nullptr && h != nullptr)
@@ -563,6 +616,16 @@ void GameProcess(Info** i, int sv, bool* shouldExit, Hero* (*selH)(short*, bool*
 		save->stats.evasion = h->evasion;
 		save->stats.block = h->block;
 		save->stats.buffN = h->buffsN;
+		if (h->items[0] != nullptr)
+		{
+			save->item1.num = h->items[0]->getNum();
+			save->item1.val = h->items[0]->getVal();
+		}
+		if (h->items[1] != nullptr)
+		{
+			save->item2.num = h->items[1]->getNum();
+			save->item2.val = h->items[1]->getVal();
+		}
 		if (h->ability != nullptr) save->stats.statDur = h->ability->statusDur;
 		else save->stats.statDur = 0;
 		if (h->ability != nullptr) save->stats.curDelay = h->ability->curDelay;
@@ -754,13 +817,13 @@ Ability* SelectAbility(short h, bool* shouldExit)
 		DrawText("Choose Ability", WIDTH / 2 - 120, HEIGHT / 2 - 220, 30, WHITE);
 
 		DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 - 100, 300, 80, WHITE);
-		DrawText(*(ab1->abTitle), WIDTH / 2 - 75, HEIGHT / 2 - 72, 24, WHITE);
+		DrawText(*(ab1->abTitle), WIDTH / 2 - 95, HEIGHT / 2 - 72, 24, WHITE);
 
 		DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 + 80, 300, 80, WHITE);
-		DrawText(*(ab2->abTitle), WIDTH / 2 - 75, HEIGHT / 2 + 108, 24, WHITE);
+		DrawText(*(ab2->abTitle), WIDTH / 2 - 95, HEIGHT / 2 + 108, 24, WHITE);
 
 		DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 + 260, 300, 80, WHITE);
-		DrawText(*(ab3->abTitle), WIDTH / 2 - 75, HEIGHT / 2 + 288, 24, WHITE);
+		DrawText(*(ab3->abTitle), WIDTH / 2 - 95, HEIGHT / 2 + 288, 24, WHITE);
 
 		if (ab != nullptr)
 		{

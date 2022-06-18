@@ -65,16 +65,20 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 				confirmation = true;
 			}
 			if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st, a2);
-			if (IsKeyPressed(KEY_DOWN) && sel < 4)
+			if (IsKeyPressed(KEY_DOWN) && sel < 6)
 			{
 				sel++;
-				if ((*h)->ability->curDelay > 0 && sel == 4) sel--;
-				if ((*sv)->charact == 3 && (*h)->buffsN != 0 && sel == 3 && (*h)->ability->curDelay == 0) sel++;
-				else if ((*sv)->charact == 3 && (*h)->buffsN != 0 && sel == 3) sel--;
+				if ((*sv)->charact == 3 && (*h)->buffsN != 0 && sel == 3) sel++;
+				if ((*h)->ability->curDelay > 0 && sel == 4) sel++;
+				if ((*h)->items[0]->getNum() == 0 && sel == 5) sel++;
+				if ((*h)->items[1]->getNum() == 0 && sel == 6) sel++;
+				if (sel > 6) sel = 0;
 			}
 			if (IsKeyPressed(KEY_UP) && sel > 1)
 			{
 				sel--;
+				if ((*h)->items[0]->getNum() == 0 && sel == 5) sel--;
+				if ((*h)->ability->curDelay > 0 && sel == 4) sel--;
 				if ((*sv)->charact == 3 && (*h)->buffsN != 0 && sel == 3) sel--;
 			}
 			if (mPos.x >= 40 && mPos.x <= 280
@@ -87,6 +91,23 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			if (mPos.x >= 40 && mPos.x <= 280
 				&& mPos.y >= HEIGHT / 2 + 320 && mPos.y <= HEIGHT / 2 + 380
 				&& (*h)->ability->curDelay == 0) sel = 4;
+			if (mPos.x >= 650 && mPos.x <= 850
+				&& mPos.y >= HEIGHT / 2 + 315 && mPos.y <= HEIGHT / 2 + 385
+				&& (*h)->items[0]->getNum() != 0) sel = 5;
+			if (mPos.x >= 900 && mPos.x <= 1100
+				&& mPos.y >= HEIGHT / 2 + 315 && mPos.y <= HEIGHT / 2 + 385
+				&& (*h)->items[1]->getNum() != 0) sel = 6;
+			if (IsKeyPressed(KEY_ENTER) && (sel == 5 || sel == 6) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT)
+				&& (mPos.x >= 650 && mPos.x <= 850
+					&& mPos.y >= HEIGHT / 2 + 315 && mPos.y <= HEIGHT / 2 + 385
+					&& (*h)->items[0]->getNum() != 0
+					|| mPos.x >= 900 && mPos.x <= 1100
+					&& mPos.y >= HEIGHT / 2 + 315 && mPos.y <= HEIGHT / 2 + 385
+					&& (*h)->items[1]->getNum() != 0))
+			{
+				(*h)->useItem(h, en, sel - 5);
+				sel = 0;
+			}
 			BeginDrawing();
 			DrawTexture(bg, 0, 0, WHITE);
 			switch (sel)
@@ -102,6 +123,12 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 				break;
 			case 4:
 				if((*h)->ability->curDelay == 0) DrawRectangle(40, HEIGHT / 2 + 320, 240, 60, YELLOW);
+				break;
+			case 5:
+				if((*h)->items[0]->getNum() != 0) DrawRectangle(650, HEIGHT / 2 + 315, 200, 70, YELLOW);
+				break;
+			case 6:
+				if ((*h)->items[1]->getNum() != 0) DrawRectangle(900, HEIGHT / 2 + 315, 200, 70, YELLOW);
 				break;
 			}
 			DrawRectangleLines(20, HEIGHT / 2, WIDTH - 40, HEIGHT / 2 - 20, WHITE);
@@ -131,7 +158,7 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 				DrawText("Archer", 300, HEIGHT / 2 + 60, 24, WHITE);
 				break;
 			case 3:
-				DrawText("Palladin", 300, HEIGHT / 2 + 60, 24, WHITE);
+				DrawText("Paladin", 300, HEIGHT / 2 + 60, 24, WHITE);
 				break;
 			}
 			DrawText(TextFormat("HP: %d/%d", (*h)->hp, (*h)->maxHP), 300, HEIGHT / 2 + 100, 24, WHITE);
@@ -159,6 +186,13 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			DrawText(TextFormat("Room %d%", (*sv)->roomNum), 20, 20, 30, WHITE);
 
 			if ((*en)->enemType == 1) DrawTextureRec(enemyTexture, frameRec, { WIDTH / 2 - 90, HEIGHT / 4 - 210 }, WHITE);
+
+			DrawRectangleLines(650, HEIGHT / 2 + 315, 200, 70, WHITE);
+			DrawRectangleLines(900, HEIGHT / 2 + 315, 200, 70, WHITE);
+
+			DrawText(*((*h)->items[0]->getName()), 660, HEIGHT / 2 + 337, 26, WHITE);
+			
+			DrawText(*((*h)->items[1]->getName()), 910, HEIGHT / 2 + 337, 26, WHITE);
 
 			ClearBackground(WHITE);
 			EndDrawing();
@@ -204,6 +238,8 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			(*h)->evasion += (*r)->evasion;
 			(*h)->spValue += (*r)->spValue;
 			(*r)->isActive = true;
+			(*r)->item1 = rand() % 4 + 1;
+			(*r)->item2 = rand() % 4 + 1;
 			break;
 		}
 		sel = rand() % 100 + 1;

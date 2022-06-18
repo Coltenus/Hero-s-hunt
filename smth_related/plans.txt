@@ -1,6 +1,5 @@
-shopkeeper animation
 new monsters
 next floor(new bg, new monsters)
-icons of battle values
 
-temporary items and item slots
+shopkeeper animation
+icons of battle values

@@ -5,6 +5,56 @@
 class Hero;
 class Enemy;
 
+class Item
+{
+private:
+	short val, numOfItem;
+	char** itemTitle;
+public:
+	Item();
+	~Item();
+	virtual void activate(Hero**, Enemy**) = 0;
+	void setVal(short);
+	void setName(char*);
+	void setNum(short);
+	short getVal();
+	char** getName();
+	short getNum();
+	void eraseName();
+};
+
+class Healing : public Item
+{
+public:
+	Healing(short);
+	~Healing();
+	void activate(Hero**, Enemy**) override;
+};
+
+class Block : public Item
+{
+public:
+	Block(short);
+	~Block();
+	void activate(Hero**, Enemy**) override;
+};
+
+class DmgPotion : public Item
+{
+public:
+	DmgPotion(short);
+	~DmgPotion();
+	void activate(Hero**, Enemy**) override;
+};
+
+class UpMaxHP : public Item
+{
+public:
+	UpMaxHP(short);
+	~UpMaxHP();
+	void activate(Hero**, Enemy**) override;
+};
+
 class Ability
 {
 public:
@@ -110,8 +160,13 @@ public:
 	virtual void Special(ROB**) = 0;
 	virtual void setAbility(Ability*) = 0;
 	virtual void useAbility(ROB**, Hero**, Enemy**) = 0;
+	void setItem(Item*);
+	void useItem(Hero**, Enemy**, short);
+	void clearSlot(short);
+	short findFreeSlot();
 public:
 	Ability *ability;
+	Item** items;
 	char** nA, ** hA, ** sp;
 	short maxHP, hp, block, evasion, buffsN;
 	short minNDMG, mcN;
@@ -119,6 +174,7 @@ public:
 	short spValue;
 	unsigned short gold;
 	short charType;
+	short slotN;
 };
 
 class Enemy

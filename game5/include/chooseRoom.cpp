@@ -10,6 +10,11 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf, Audi
 	static bool isNewRoom;
 	static Texture2D enemyTexture, bg;
 	static Rectangle frameRec;
+	static Item* i1, *i2;
+	static short itemLeft, sel;
+	static Vector2 mPos;
+	static bool confirm, isItemTaken;
+	isItemTaken = false;
 	isNewRoom = true;
 	(*sv)->roomNum++;
 	r = new Rewards;
@@ -74,6 +79,42 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf, Audi
 		enemyTexture = LoadTexture("src/Zombie.png");
 		frameRec = { (float)enemyTexture.width / 4 * 3, 0, (float)enemyTexture.width / 4, (float)enemyTexture.height };
 	}
+	if (r->isActive)
+	{
+		confirm = false;
+		itemLeft = 0;
+		sel = 0;
+		switch (r->item1)
+		{
+		case 1:
+			i1 = new Healing((*sv)->roomNum);
+			break;
+		case 2:
+			i1 = new Block((*sv)->roomNum);
+			break;
+		case 3:
+			i1 = new DmgPotion((*sv)->roomNum);
+			break;
+		case 4:
+			i1 = new UpMaxHP((*sv)->roomNum);
+			break;
+		}
+		switch (r->item2)
+		{
+		case 1:
+			i2 = new Healing((*sv)->roomNum);
+			break;
+		case 2:
+			i2 = new Block((*sv)->roomNum);
+			break;
+		case 3:
+			i2 = new DmgPotion((*sv)->roomNum);
+			break;
+		case 4:
+			i2 = new UpMaxHP((*sv)->roomNum);
+			break;
+		}
+	}
 	while (r->isActive && !(*shouldExit))
 	{
 		bg = LoadTexture("src/bg.png");
@@ -85,10 +126,72 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf, Audi
 			if ((*sv)->hours == 24) (*sv)->days++;
 		}
 		if (IsKeyPressed(KEY_I)) *shouldExit = OpenInfo(inf, sv, st, a2);
-		if (IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) r->isActive = false;
+		if (IsKeyPressed(KEY_B) || IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) r->isActive = false;
+		if (!confirm)
+		{
+			mPos = GetMousePosition();
+			if (IsKeyPressed(KEY_DOWN) && sel < 3)
+				sel++;
+			if (IsKeyPressed(KEY_UP) && sel > 1)
+				sel--;
+			if (mPos.x >= WIDTH / 2 - 550 && mPos.x <= WIDTH / 2 - 350
+				&& mPos.y >= HEIGHT / 2 - 400 && mPos.y <= HEIGHT / 2 - 300)
+				sel = 1;
+			if (mPos.x >= WIDTH / 2 - 100 && mPos.x <= WIDTH / 2 + 100
+				&& mPos.y >= HEIGHT / 2 - 400 && mPos.y <= HEIGHT / 2 - 300)
+				sel = 2;
+			if (mPos.x >= WIDTH / 2 + 350 && mPos.x <= WIDTH / 2 + 550
+				&& mPos.y >= HEIGHT / 2 - 400 && mPos.y <= HEIGHT / 2 - 300)
+				sel = 3;
+			if (IsKeyPressed(KEY_ENTER) && sel >= 1 && sel <= 3 || IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+				(mPos.x >= WIDTH / 2 - 550 && mPos.x <= WIDTH / 2 - 350
+					&& mPos.y >= HEIGHT / 2 - 400 && mPos.y <= HEIGHT / 2 - 300
+					|| mPos.x >= WIDTH / 2 - 100 && mPos.x <= WIDTH / 2 + 100
+					&& mPos.y >= HEIGHT / 2 - 400 && mPos.y <= HEIGHT / 2 - 300
+					|| mPos.x >= WIDTH / 2 + 350 && mPos.x <= WIDTH / 2 + 550
+					&& mPos.y >= HEIGHT / 2 - 400 && mPos.y <= HEIGHT / 2 - 300))
+				confirm = true;
+		}
+		
 		if (WindowShouldClose()) *shouldExit = true;
 		BeginDrawing();
 		DrawTexture(bg, 0, 0, WHITE);
+		if (!confirm)
+		{
+			switch (sel)
+			{
+			case 1:
+				DrawRectangle(WIDTH / 2 - 550, HEIGHT / 2 - 400, 200, 100, YELLOW);
+				break;
+			case 2:
+				DrawRectangle(WIDTH / 2 - 100, HEIGHT / 2 - 400, 200, 100, YELLOW);
+				break;
+			case 3:
+				DrawRectangle(WIDTH / 2 + 350, HEIGHT / 2 - 400, 200, 100, YELLOW);
+				break;
+			}
+		}
+		else
+		{
+			if (!isItemTaken && (*h)->findFreeSlot() < (*h)->slotN)
+			{
+				switch (sel)
+				{
+				case 1:
+					(*h)->setItem(i1);
+					itemLeft = 2;
+					break;
+				case 2:
+					(*h)->setItem(i2);
+					itemLeft = 1;
+					break;
+				}
+				isItemTaken = true;
+			}
+			DrawRectangle(WIDTH / 2 - 550, HEIGHT / 2 - 400, 200, 100, GRAY);
+			DrawRectangle(WIDTH / 2 - 100, HEIGHT / 2 - 400, 200, 100, GRAY);
+			DrawRectangle(WIDTH / 2 + 350, HEIGHT / 2 - 400, 200, 100, GRAY);
+		}
 		DrawRectangleLines(20, HEIGHT / 2, WIDTH - 40, HEIGHT / 2 - 20, WHITE);
 		DrawTextureRec(enemyTexture, frameRec, { WIDTH / 2 - 75, HEIGHT / 2 - 450 }, WHITE);
 		DrawText(TextFormat("Room %hu", (*sv)->roomNum), WIDTH / 2 - 25, HEIGHT / 2 + 50, 30, WHITE);
@@ -98,10 +201,81 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf, Audi
 		DrawText(TextFormat("+%hu min heavy DMG", r->minNDMG), 700, HEIGHT / 2 + 300, 24, WHITE);
 		DrawText(TextFormat("+%hu special value", r->spValue), 1000, HEIGHT / 2 + 300, 24, WHITE);
 		DrawText(TextFormat("+%hu evasion", r->evasion), 1300, HEIGHT / 2 + 300, 24, WHITE);
+
+		DrawText("Choose your reward item", WIDTH / 2 - 180, HEIGHT / 2 - 440, 30, WHITE);
+
+		DrawRectangleLines(WIDTH / 2 - 550, HEIGHT / 2 - 400, 200, 100, WHITE);
+		DrawText(*(i1->getName()), WIDTH / 2 - 540, HEIGHT / 2 - 363, 26, WHITE);
+		switch (i1->getNum())
+		{
+		case 1:
+			DrawText(TextFormat("Heals by value of %d", i1->getVal()), WIDTH / 2 - 550,
+				HEIGHT / 2 - 290, 26, WHITE);
+			break;
+		case 2:
+			DrawText(TextFormat("Gives block by value of %d", i1->getVal()), WIDTH / 2 - 550,
+				HEIGHT / 2 - 290, 26, WHITE);
+			break;
+		case 3:
+			DrawText(TextFormat("Deal damage to the\nenemy by value of %d", i1->getVal()),
+				WIDTH / 2 - 550, HEIGHT / 2 - 290, 26, WHITE);
+			break;
+		case 4:
+			DrawText(TextFormat("Ups your maximum Hp\nby value of %d", i1->getVal()),
+				WIDTH / 2 - 550, HEIGHT / 2 - 290, 26, WHITE);
+			break;
+		}
+
+		DrawRectangleLines(WIDTH / 2 - 100, HEIGHT / 2 - 400, 200, 100, WHITE);
+		DrawText(*(i2->getName()), WIDTH / 2 - 90, HEIGHT / 2 - 363, 26, WHITE);
+		switch (i2->getNum())
+		{
+		case 1:
+			DrawText(TextFormat("Heals by value of %d", i2->getVal()), WIDTH / 2 - 100,
+				HEIGHT / 2 - 290, 26, WHITE);
+			break;
+		case 2:
+			DrawText(TextFormat("Gives block by value of %d", i2->getVal()), WIDTH / 2 - 100,
+				HEIGHT / 2 - 290, 26, WHITE);
+			break;
+		case 3:
+			DrawText(TextFormat("Deal damage to the\nenemy by value of %d", i2->getVal()),
+				WIDTH / 2 - 100, HEIGHT / 2 - 290, 26, WHITE);
+			break;
+		case 4:
+			DrawText(TextFormat("Ups your maximum Hp\nby value of %d", i2->getVal()),
+				WIDTH / 2 - 100, HEIGHT / 2 - 290, 26, WHITE);
+			break;
+		}
+
+		DrawRectangleLines(WIDTH / 2 + 350, HEIGHT / 2 - 400, 200, 100, WHITE);
+		DrawText("Decline", WIDTH / 2 + 360, HEIGHT / 2 - 363, 26, WHITE);
+
 		ClearBackground(WHITE);
 		EndDrawing();
 		(*a2).update();
 		UnloadTexture(bg);
+	}
+	if (itemLeft != -1)
+	{
+		switch (itemLeft)
+		{
+		case 0:
+			delete i1;
+			delete i2;
+			i1 = nullptr;
+			i2 = nullptr;
+			break;
+		case 1:
+			delete i1;
+			i1 = nullptr;
+			break;
+		case 2:
+			delete i2;
+			i2 = nullptr;
+			break;
+		}
+		itemLeft = -1;
 	}
 	if (*shouldExit)
 	{

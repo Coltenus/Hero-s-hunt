@@ -7,6 +7,7 @@ typedef struct _rewards
 {
 	unsigned short gold, hp, minNDMG, minHDMG, evasion, spValue;
 	bool isActive;
+	short item1, item2;
 }Rewards;
 
 typedef struct _save
@@ -19,10 +20,14 @@ typedef struct _save
 	{
 		short dmgN, dmgH, hp, maxHP, rewGold, spV, modAt, enType, modIM;
 	};
+	struct _item {
+		short val, num;
+	};
 	int order;
 	int minutes, hours, days;
 	unsigned short charact, ability;
 	chOfStats stats;
+	_item item1, item2;
 	enSt enemyStats;
 	unsigned short gold;
 	unsigned short roomNum;

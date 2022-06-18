@@ -21,6 +21,16 @@ Hero::Hero()
 	mcH = 0;
 	ability = nullptr;
 	charType = 0;
+	slotN = 2;
+	items = new Item*[slotN];
+	items[0] = new Healing(1);
+	items[0]->setName((char*)"Empty slot");
+	items[0]->setVal(0);
+	items[0]->setNum(0);
+	items[1] = new Healing(1);
+	items[1]->setName((char*)"Empty slot");
+	items[1]->setVal(0);
+	items[1]->setNum(0);
 }
 
 Hero::~Hero()
@@ -45,6 +55,11 @@ Hero::~Hero()
 		delete ability;
 		ability = nullptr;
 	}
+	if (items != nullptr)
+	{
+		delete[] items;
+		items = nullptr;
+	}
 }
 
 Enemy::Enemy()
@@ -60,7 +75,7 @@ Enemy::Enemy()
 	modInMoves = 0;
 }
 
-Swordsman::Swordsman()
+Swordsman::Swordsman() : Hero()
 {
 	minNDMG = 10;
 	mcN = 20;
@@ -89,6 +104,8 @@ Swordsman::~Swordsman()
 	nA = nullptr;
 	hA = nullptr;
 	sp = nullptr;
+	delete[] items;
+	items = nullptr;
 }
 
 void Swordsman::Attack(ROB** res, Enemy** e)
@@ -294,7 +311,7 @@ void Zombie::Special(ROB** res)
 	modAt = 1;
 }
 
-Archer::Archer()
+Archer::Archer() : Hero()
 {
 	minNDMG = 5;
 	mcN = 30;
@@ -323,6 +340,8 @@ Archer::~Archer()
 	nA = nullptr;
 	hA = nullptr;
 	sp = nullptr;
+	delete[] items;
+	items = nullptr;
 }
 
 void Archer::Attack(ROB** res, Enemy** e)
@@ -398,7 +417,7 @@ void Archer::useAbility(ROB** res, Hero** h, Enemy** en)
 	(*res)->hMiss = false;
 }
 
-Paladin::Paladin()
+Paladin::Paladin() : Hero()
 {
 	minNDMG = 20;
 	mcN = 25;
@@ -427,6 +446,8 @@ Paladin::~Paladin()
 	nA = nullptr;
 	hA = nullptr;
 	sp = nullptr;
+	delete[] items;
+	items = nullptr;
 }
 
 void Paladin::Attack(ROB** res, Enemy** e)
@@ -785,4 +806,170 @@ void PalAb3::activate(Hero** h, Enemy** en)
 		if ((*en)->hp > (*en)->maxHP) (*en)->hp = (*en)->maxHP;
 		curDelay = maxDelay;
 	}
+}
+
+Item::Item()
+{
+	val = 0;
+	numOfItem = 0;
+	itemTitle = nullptr;
+}
+
+Item::~Item()
+{
+	if (itemTitle != nullptr)
+	{
+		delete[] itemTitle;
+		itemTitle = nullptr;
+	}
+}
+
+void Item::setVal(short val)
+{
+	this->val = val;
+}
+
+void Item::setName(char* name)
+{
+	if (itemTitle != nullptr)
+	{
+		delete[] itemTitle;
+	}
+	itemTitle = new char* [strlen(name)+1];
+	*itemTitle = name;
+}
+
+void Item::setNum(short num)
+{
+	numOfItem = num;
+}
+
+short Item::getVal()
+{
+	return val;
+}
+
+char** Item::getName()
+{
+	return itemTitle;
+}
+
+short Item::getNum()
+{
+	return numOfItem;
+}
+
+void Item::eraseName()
+{
+	if (itemTitle != nullptr)
+	{
+		delete[] itemTitle;
+		itemTitle = nullptr;
+	}
+}
+
+Healing::Healing(short i) : Item()
+{
+	setVal(10 + rand() % (i + 1));
+	setName((char*)"Heal Potion");
+	setNum(1);
+}
+
+Healing::~Healing()
+{
+	eraseName();
+}
+
+void Healing::activate(Hero** h, Enemy** en)
+{
+	(*h)->hp += getVal();
+	if ((*h)->hp > (*h)->maxHP) (*h)->hp = (*h)->maxHP;
+}
+
+Block::Block(short i) : Item()
+{
+	setVal(10 + rand() % (i + 1));
+	setName((char*)"Shield");
+	setNum(2);
+}
+
+Block::~Block()
+{
+	eraseName();
+}
+
+void Block::activate(Hero** h, Enemy** en)
+{
+	(*h)->block += getVal();
+}
+
+DmgPotion::DmgPotion(short i) : Item()
+{
+	setVal(20 + rand() % (i + 1));
+	setName((char*)"Fire potion");
+	setNum(3);
+}
+
+DmgPotion::~DmgPotion()
+{
+	eraseName();
+}
+
+void DmgPotion::activate(Hero** h, Enemy** en)
+{
+	(*en)->hp -= getVal();
+	if ((*en)->hp < 1) (*en)->hp = 1;
+}
+
+UpMaxHP::UpMaxHP(short i) : Item()
+{
+	setVal(5 + (short)(rand() % (i + 1) / 4));
+	setName((char*)"Fairy potion");
+	setNum(4);
+}
+
+UpMaxHP::~UpMaxHP()
+{
+	eraseName();
+}
+
+void UpMaxHP::activate(Hero** h, Enemy** en)
+{
+	(*h)->maxHP += getVal();
+}
+
+void Hero::setItem(Item* it)
+{
+	short sl = findFreeSlot();
+	if (sl != slotN)
+	{
+		delete items[sl];
+		items[sl] = it;
+	}
+}
+
+void Hero::useItem(Hero** h, Enemy** en, short i)
+{
+	items[i]->activate(h, en);
+	clearSlot(i);
+}
+
+void Hero::clearSlot(short i)
+{
+	delete items[i];
+	items[i] = nullptr;
+	items[i] = new Healing(1);
+	items[i]->setName((char*)"Empty slot");
+	items[i]->setVal(0);
+	items[i]->setNum(0);
+}
+
+short Hero::findFreeSlot()
+{
+	short i = 0;
+	while (i < slotN && items[i]->getNum() != 0)
+	{
+		i++;
+	}
+	return i;
 }
