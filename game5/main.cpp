@@ -16,9 +16,9 @@ using namespace std;
 void FillFile();
 void EnterUsername(Info**, bool*);
 int SelectionMenu(Info**, int*);
-void GameProcess(Info**, int, bool*, short (*)(short*, bool*), short (*)(short, bool*));
-short SelectHero(short*, bool*);
-short SelectAbility(short, bool*);
+void GameProcess(Info**, int, bool*, Hero* (*)(short*, bool*), Ability* (*)(short, bool*));
+Hero* SelectHero(short*, bool*);
+Ability* SelectAbility(short, bool*);
 void CheckStartConditions(int, char**, bool*);
 int StartMenu(Info**, int*);
 int HelpMenu();
@@ -303,6 +303,7 @@ int SelectionMenu(Info** i, int *sel)
 			save->stats.block = 0;
 			save->stats.buffN = 0;
 			save->stats.curDelay = 0;
+			save->stats.statDur = 0;
 			save->enemyStats.modIM = 0;
 			save->roomNum = 0;
 			save->roomType = 0;
@@ -327,7 +328,7 @@ int SelectionMenu(Info** i, int *sel)
 	else return 4;
 }
 
-void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*), short (*selAb)(short, bool*))
+void GameProcess(Info** i, int sv, bool* shouldExit, Hero* (*selH)(short*, bool*), Ability* (*selAb)(short, bool*))
 {
 	static double st;
 	static bool isReady;
@@ -379,6 +380,7 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		save->stats.block = 0;
 		save->stats.buffN = 0;
 		save->stats.curDelay = 0;
+		save->stats.statDur = 0;
 		save->enemyStats.modIM = 0;
 		save->roomNum = 0;
 		save->roomType = 0;
@@ -395,42 +397,84 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		f = fopen(*buf, "rb");
 	}
 	fread(save, sizeof(Save), 1, f);
-	while (save->charact == 0 && !(*shouldExit))
+	while (save->charact == 0 && !IsKeyPressed(KEY_SPACE) && !IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
 	{
-		save->charact = selH(&chooseH, shouldExit);
+		BeginDrawing();
+		DrawText("Press Space to continue", WIDTH / 2 - 150, HEIGHT / 2 - 200, 30, BLACK);
+		ClearBackground(DARKBLUE);
+		EndDrawing();
+		a2.update();
 	}
-	if(save->ability == 0 && !(*shouldExit)) save->ability = selAb(save->charact, shouldExit);
-	switch (save->charact)
+	if (save->charact == 0) h = selH(&chooseH, shouldExit);
+	else
 	{
-	case 1:
-		h = new Swordsman;
-		switch (save->ability)
+		switch (save->charact)
 		{
 		case 1:
-			h->setAbility(new SwAb1);
+			h = new Swordsman;
+			break;
+		case 2:
+			h = new Archer;
+			break;
+		case 3:
+			h = new Paladin;
 			break;
 		}
-		break;
-	case 2:
-		h = new Archer;
-		switch (save->ability)
-		{
-		case 1:
-			h->setAbility(new ArAb1);
-			break;
-		}
-		break;
-	case 3:
-		h = new Paladin;
-		switch (save->ability)
-		{
-		case 1:
-			h->setAbility(new PalAb1);
-			break;
-		}
-		break;
 	}
-	if (save->stats.hp != 0)
+	if (h == nullptr) *shouldExit = true;
+	if (h != nullptr) save->charact = h->charType;
+	if (h != nullptr && save->ability == 0 && !(*shouldExit)) h->ability = selAb(save->charact, shouldExit);
+	else
+	{
+		switch (save->charact)
+		{
+		case 1:
+			switch (save->ability)
+			{
+			case 1:
+				h->ability = new SwAb1;
+				break;
+			case 2:
+				h->ability = new SwAb2;
+				break;
+			case 3:
+				h->ability = new SwAb3;
+				break;
+			}
+			break;
+		case 2:
+			switch (save->ability)
+			{
+			case 1:
+				h->ability = new ArAb1;
+				break;
+			case 2:
+				h->ability = new ArAb2;
+				break;
+			case 3:
+				h->ability = new ArAb3;
+				break;
+			}
+			break;
+		case 3:
+			switch (save->ability)
+			{
+			case 1:
+				h->ability = new PalAb1;
+				break;
+			case 2:
+				h->ability = new PalAb2;
+				break;
+			case 3:
+				h->ability = new PalAb3;
+				break;
+			}
+			break;
+		}
+	}
+	if (h != nullptr && h->ability == nullptr) *shouldExit = true;
+	if (h != nullptr && h->ability != nullptr) save->ability = h->ability->numOfAb;
+	if (h != nullptr && save->stats.hp != 0)
 	{
 		h->hp = save->stats.hp;
 		h->maxHP = save->stats.maxHP;
@@ -440,6 +484,7 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		h->evasion = save->stats.evasion;
 		h->block = save->stats.block;
 		h->buffsN = save->stats.buffN;
+		h->ability->statusDur = save->stats.statDur;
 		h->ability->curDelay = save->stats.curDelay;
 		h->gold = save->gold;
 	}
@@ -495,6 +540,7 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		save->stats.block = 0;
 		save->stats.buffN = 0;
 		save->stats.curDelay = 0;
+		save->stats.statDur = 0;
 		save->enemyStats.modIM = 0;
 		save->roomNum = 0;
 		save->enemyStats.enType = 0;
@@ -507,7 +553,7 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		save->enemyStats.spV = 0;
 		fwrite(save, sizeof(Save), 1, f);
 	}
-	else if (save != NULL && h != NULL)
+	else if (save != nullptr && h != nullptr)
 	{
 		save->stats.hp = h->hp;
 		save->stats.maxHP = h->maxHP;
@@ -517,6 +563,8 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		save->stats.evasion = h->evasion;
 		save->stats.block = h->block;
 		save->stats.buffN = h->buffsN;
+		if (h->ability != nullptr) save->stats.statDur = h->ability->statusDur;
+		else save->stats.statDur = 0;
 		if (h->ability != nullptr) save->stats.curDelay = h->ability->curDelay;
 		else save->stats.curDelay = 0;
 		save->gold = h->gold;
@@ -524,103 +572,122 @@ void GameProcess(Info** i, int sv, bool* shouldExit, short (*selH)(short*, bool*
 		fwrite(save, sizeof(Save), 1, f);
 	}
 	fclose(f);
-	if (save != NULL)
+	if (save != nullptr)
 	{
 		delete save;
 		save = nullptr;
 	}
-	if (buf != NULL)
+	if (buf != nullptr)
 	{
 		delete[] buf;
 		buf = nullptr;
 	}
-	if (h != NULL)
+	if (h != nullptr)
 	{
 		delete h;
 		h = nullptr;
 	}
-	if (en != NULL)
+	if (en != nullptr)
 	{
 		delete en;
 		en = nullptr;
 	}
 }
 
-short SelectHero(short* sel, bool* shouldExit)
+Hero* SelectHero(short* sel, bool* shouldExit)
 {
 	static Vector2 mPos;
 	static Hero* h;
-	mPos = GetMousePosition();
-	if (IsKeyPressed(KEY_DOWN) && *sel < 3)
-		(*sel)++;
-	if (IsKeyPressed(KEY_UP) && *sel > 1)
-		(*sel)--;
-	if (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
-		&& mPos.y >= HEIGHT / 2 - 200 && mPos.y <= HEIGHT / 2 - 120) *sel = 1;
-	if (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
-		&& mPos.y >= HEIGHT / 2 - 20 && mPos.y <= HEIGHT / 2 + 60) *sel = 2;
-	if (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
-		&& mPos.y >= HEIGHT / 2 + 160 && mPos.y <= HEIGHT / 2 + 240) *sel = 3;
-	BeginDrawing();
-	switch (*sel)
+	static bool confirm;
+	confirm = false;
+	h = nullptr;
+	while (!confirm && !(*shouldExit))
 	{
-	case 1:
-		h = new Swordsman;
-		DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 - 200, 300, 80, YELLOW);
-		break;
-	case 2:
-		h = new Archer;
-		DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 - 20, 300, 80, YELLOW);
-		break;
-	case 3:
-		h = new Paladin;
-		DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 + 160, 300, 80, YELLOW);
-		break;
+		mPos = GetMousePosition();
+		if (IsKeyPressed(KEY_DOWN) && *sel < 3)
+			(*sel)++;
+		if (IsKeyPressed(KEY_UP) && *sel > 1)
+			(*sel)--;
+		if (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+			&& mPos.y >= HEIGHT / 2 - 200 && mPos.y <= HEIGHT / 2 - 120) *sel = 1;
+		if (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+			&& mPos.y >= HEIGHT / 2 - 20 && mPos.y <= HEIGHT / 2 + 60) *sel = 2;
+		if (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+			&& mPos.y >= HEIGHT / 2 + 160 && mPos.y <= HEIGHT / 2 + 240) *sel = 3;
+		if (IsKeyPressed(KEY_ENTER) && *sel >= 1 && *sel <= 3 || IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+			(mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+				&& mPos.y >= HEIGHT / 2 - 200 && mPos.y <= HEIGHT / 2 - 120
+				|| mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+				&& mPos.y >= HEIGHT / 2 - 20 && mPos.y <= HEIGHT / 2 + 60
+				|| mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+				&& mPos.y >= HEIGHT / 2 + 160 && mPos.y <= HEIGHT / 2 + 240))
+			confirm = true;
+		BeginDrawing();
+		switch (*sel)
+		{
+		case 1:
+			h = new Swordsman;
+			DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 - 200, 300, 80, YELLOW);
+			break;
+		case 2:
+			h = new Archer;
+			DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 - 20, 300, 80, YELLOW);
+			break;
+		case 3:
+			h = new Paladin;
+			DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 + 160, 300, 80, YELLOW);
+			break;
+		}
+		DrawText("Choose Hero", WIDTH / 2 - 110, HEIGHT / 2 - 320, 30, WHITE);
+
+		DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 - 200, 300, 80, WHITE);
+		DrawText("Swordsman", WIDTH / 2 - 65, HEIGHT / 2 - 172, 24, WHITE);
+
+		DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 - 20, 300, 80, WHITE);
+		DrawText("Archer", WIDTH / 2 - 40, HEIGHT / 2 + 8, 24, WHITE);
+
+		DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 + 160, 300, 80, WHITE);
+		DrawText("Paladin", WIDTH / 2 - 40, HEIGHT / 2 + 188, 24, WHITE);
+
+		if (h != nullptr && h->nA != nullptr && !confirm)
+		{
+			DrawText(*(h->nA), WIDTH / 2 + 200, HEIGHT / 2 - 260, 30, WHITE);
+			DrawText(TextFormat("Minimal DMG: %d", h->minNDMG), WIDTH / 2 + 200, HEIGHT / 2 - 220, 30, WHITE);
+			DrawText(TextFormat("Miss chance: %d%%", h->mcN), WIDTH / 2 + 200, HEIGHT / 2 - 180, 30, WHITE);
+
+			DrawText(*(h->hA), WIDTH / 2 + 200, HEIGHT / 2 - 60, 30, WHITE);
+			DrawText(TextFormat("Minimal DMG: %d", h->minHDMG), WIDTH / 2 + 200, HEIGHT / 2 - 20, 30, WHITE);
+			DrawText(TextFormat("Miss chance: %d%%", h->mcH), WIDTH / 2 + 200, HEIGHT / 2 + 20, 30, WHITE);
+			if (*sel == 2)DrawText("Do three independent attacks", WIDTH / 2 + 200, HEIGHT / 2 + 60, 30, WHITE);
+			else if (*sel == 3) DrawText("As block gain 30% of\nminimal DMG value", WIDTH / 2 + 200, HEIGHT / 2 + 60, 30, WHITE);
+
+			DrawText(*(h->sp), WIDTH / 2 + 200, HEIGHT / 2 + 220, 30, WHITE);
+			DrawText(TextFormat("Special value: %d", h->spValue), WIDTH / 2 + 200, HEIGHT / 2 + 260, 30, WHITE);
+			if (*sel == 3) DrawText("Randomly heal by a value\nfrom 1 to special value", WIDTH / 2 + 200, HEIGHT / 2 + 300, 30, WHITE);
+
+			delete h;
+			h = nullptr;
+		}
+
+		ClearBackground(DARKBLUE);
+		EndDrawing();
+		if (WindowShouldClose())
+		{
+			*shouldExit = true;
+		}
 	}
-	DrawText("Choose Hero", WIDTH / 2 - 110, HEIGHT / 2 - 320, 30, WHITE);
-
-	DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 - 200, 300, 80, WHITE);
-	DrawText("Swordsman", WIDTH / 2 - 65, HEIGHT / 2 - 172, 24, WHITE);
-
-	DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 - 20, 300, 80, WHITE);
-	DrawText("Archer", WIDTH / 2 - 40, HEIGHT / 2 + 8, 24, WHITE);
-
-	DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 + 160, 300, 80, WHITE);
-	DrawText("Paladin", WIDTH / 2 - 40, HEIGHT / 2 + 188, 24, WHITE);
-
-	if (h != nullptr)
+	
+	if (*shouldExit)
 	{
-		DrawText(*(h->nA), WIDTH / 2 + 200, HEIGHT / 2 - 260, 30, WHITE);
-		DrawText(TextFormat("Minimal DMG: %d", h->minNDMG), WIDTH / 2 + 200, HEIGHT / 2 - 220, 30, WHITE);
-		DrawText(TextFormat("Miss chance: %d%%", h->mcN), WIDTH / 2 + 200, HEIGHT / 2 - 180, 30, WHITE);
-
-		DrawText(*(h->hA), WIDTH / 2 + 200, HEIGHT / 2 - 60, 30, WHITE);
-		DrawText(TextFormat("Minimal DMG: %d", h->minHDMG), WIDTH / 2 + 200, HEIGHT / 2 - 20, 30, WHITE);
-		DrawText(TextFormat("Miss chance: %d%%", h->mcH), WIDTH / 2 + 200, HEIGHT / 2 + 20, 30, WHITE);
-		if(*sel == 2)DrawText("Do three independent attacks", WIDTH / 2 + 200, HEIGHT / 2 + 60, 30, WHITE);
-		else if(*sel == 3) DrawText("As block gain 30% of\nminimal DMG value", WIDTH / 2 + 200, HEIGHT / 2 + 60, 30, WHITE);
-
-		DrawText(*(h->sp), WIDTH / 2 + 200, HEIGHT / 2 + 220, 30, WHITE);
-		DrawText(TextFormat("Special value: %d", h->spValue), WIDTH / 2 + 200, HEIGHT / 2 + 260, 30, WHITE);
-		if(*sel == 3) DrawText("Randomly heal by a value\nfrom 1 to special value", WIDTH / 2 + 200, HEIGHT / 2 + 300, 30, WHITE);
-
 		delete h;
 		h = nullptr;
+		return nullptr;
 	}
-
-	ClearBackground(DARKBLUE);
-	EndDrawing();
-	if (WindowShouldClose())
-	{
-		*shouldExit = true;
-		return 0;
-	}
-	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && *sel >= 1 && *sel <= 3) return *sel;
-	if (IsKeyPressed(KEY_ENTER) && *sel >= 1 && *sel <= 3) return *sel;
-	else return 0;
+	if (confirm && *sel >= 1 && *sel <= 3) return h;
+	else return nullptr;
 }
 
-short SelectAbility(short h, bool* shouldExit)
+Ability* SelectAbility(short h, bool* shouldExit)
 {
 	static Vector2 mPos;
 	static Ability* ab1, *ab2, *ab3, *ab;
@@ -633,18 +700,18 @@ short SelectAbility(short h, bool* shouldExit)
 	{
 	case 1:
 		ab1 = new SwAb1;
-		ab2 = new SwAb1;
-		ab3 = new SwAb1;
+		ab2 = new SwAb2;
+		ab3 = new SwAb3;
 		break;
 	case 2:
 		ab1 = new ArAb1;
-		ab2 = new ArAb1;
-		ab3 = new ArAb1;
+		ab2 = new ArAb2;
+		ab3 = new ArAb3;
 		break;
 	case 3:
 		ab1 = new PalAb1;
-		ab2 = new PalAb1;
-		ab3 = new PalAb1;
+		ab2 = new PalAb2;
+		ab3 = new PalAb3;
 		break;
 	}
 	while (!confirm && !*(shouldExit))
@@ -662,11 +729,11 @@ short SelectAbility(short h, bool* shouldExit)
 			&& mPos.y >= HEIGHT / 2 + 260 && mPos.y <= HEIGHT / 2 + 340) sel = 3;
 		if (IsKeyPressed(KEY_ENTER) && sel >= 1 && sel <= 3 || IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
 			(mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
-				&& mPos.y >= HEIGHT / 2 - 100 && mPos.y <= HEIGHT / 2 - 20))
-				//|| mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
-				//&& mPos.y >= HEIGHT / 2 + 80 && mPos.y <= HEIGHT / 2 + 140
-				//|| mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
-				//&& mPos.y >= HEIGHT / 2 + 260 && mPos.y <= HEIGHT / 2 + 340)) 
+				&& mPos.y >= HEIGHT / 2 - 100 && mPos.y <= HEIGHT / 2 - 20
+				|| mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+				&& mPos.y >= HEIGHT / 2 + 80 && mPos.y <= HEIGHT / 2 + 140
+				|| mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+				&& mPos.y >= HEIGHT / 2 + 260 && mPos.y <= HEIGHT / 2 + 340)) 
 				confirm = true;
 		BeginDrawing();
 		switch (sel)
@@ -676,11 +743,11 @@ short SelectAbility(short h, bool* shouldExit)
 			DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 - 100, 300, 80, YELLOW);
 			break;
 		case 2:
-			//ab = ab2;
+			ab = ab2;
 			DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 + 80, 300, 80, YELLOW);
 			break;
 		case 3:
-			//ab = ab3;
+			ab = ab3;
 			DrawRectangle(WIDTH / 2 - 150, HEIGHT / 2 + 260, 300, 80, YELLOW);
 			break;
 		}
@@ -690,10 +757,10 @@ short SelectAbility(short h, bool* shouldExit)
 		DrawText(*(ab1->abTitle), WIDTH / 2 - 75, HEIGHT / 2 - 72, 24, WHITE);
 
 		DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 + 80, 300, 80, WHITE);
-		DrawText("Not working", WIDTH / 2 - 75, HEIGHT / 2 + 108, 24, WHITE);
+		DrawText(*(ab2->abTitle), WIDTH / 2 - 75, HEIGHT / 2 + 108, 24, WHITE);
 
 		DrawRectangleLines(WIDTH / 2 - 150, HEIGHT / 2 + 260, 300, 80, WHITE);
-		DrawText("Not working", WIDTH / 2 - 75, HEIGHT / 2 + 288, 24, WHITE);
+		DrawText(*(ab3->abTitle), WIDTH / 2 - 75, HEIGHT / 2 + 288, 24, WHITE);
 
 		if (ab != nullptr)
 		{
@@ -720,10 +787,13 @@ short SelectAbility(short h, bool* shouldExit)
 				switch (h)
 				{
 				case 1:
+					DrawText("Your abilities will have double\nvalues for two moves", WIDTH / 2 + 200, HEIGHT / 2 + 20, 30, WHITE);
 					break;
 				case 2:
+					DrawText("Your next ability will\nbe done twice", WIDTH / 2 + 200, HEIGHT / 2 + 20, 30, WHITE);
 					break;
 				case 3:
+					DrawText("Your next ability will be done\nmaximum accuracy with double value", WIDTH / 2 + 200, HEIGHT / 2 + 20, 30, WHITE);
 					break;
 				}
 				break;
@@ -731,10 +801,13 @@ short SelectAbility(short h, bool* shouldExit)
 				switch (h)
 				{
 				case 1:
+					DrawText("Your next attack won't miss", WIDTH / 2 + 200, HEIGHT / 2 + 20, 30, WHITE);
 					break;
 				case 2:
+					DrawText("Next two moves enemy will\nattack with 0.5x damage", WIDTH / 2 + 200, HEIGHT / 2 + 20, 30, WHITE);
 					break;
 				case 3:
+					DrawText("Swap your hp with enemy", WIDTH / 2 + 200, HEIGHT / 2 + 20, 30, WHITE);
 					break;
 				}
 				break;
@@ -749,18 +822,47 @@ short SelectAbility(short h, bool* shouldExit)
 		}
 	}
 
-
-	delete ab1;
-	delete ab2;
-	delete ab3;
-	ab1 = nullptr;
-	ab2 = nullptr;
-	ab3 = nullptr;
 	ab = nullptr;
 
-	if (*shouldExit) return 0;
-	if (confirm && sel >= 1 && sel <= 3) return 1;//sel;
-	else return 0;
+	if (*shouldExit) return nullptr;
+	else if (confirm)
+	{
+		switch (sel)
+		{
+		case 1:
+			delete ab2;
+			delete ab3;
+			ab2 = nullptr;
+			ab3 = nullptr;
+			return ab1;
+			break;
+		case 2:
+			delete ab1;
+			delete ab3;
+			ab1 = nullptr;
+			ab3 = nullptr;
+			return ab2;
+			break;
+		case 3:
+			delete ab1;
+			delete ab2;
+			ab1 = nullptr;
+			ab2 = nullptr;
+			return ab3;
+			break;
+		}
+	}
+	else
+	{
+		delete ab1;
+		delete ab2;
+		delete ab3;
+		ab1 = nullptr;
+		ab2 = nullptr;
+		ab3 = nullptr;
+		return nullptr;
+	}
+	return nullptr;
 }
 
 void CheckStartConditions(int argc, char** argv, bool* shouldExit)

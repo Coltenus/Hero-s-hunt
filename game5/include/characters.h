@@ -9,7 +9,7 @@ class Ability
 {
 public:
 	short abilityVal, addAbilityVal;
-	unsigned short curDelay, maxDelay, numOfAb;
+	unsigned short curDelay, maxDelay, numOfAb, statusDur;
 	char** abTitle;
 public:
 	Ability();
@@ -27,6 +27,24 @@ public:
 	void activate(Hero**, Enemy**);
 };
 
+class SwAb2 : public Ability
+{
+public:
+	SwAb2();
+	~SwAb2() override;
+public:
+	void activate(Hero**, Enemy**);
+};
+
+class SwAb3 : public Ability
+{
+public:
+	SwAb3();
+	~SwAb3() override;
+public:
+	void activate(Hero**, Enemy**);
+};
+
 class ArAb1 : public Ability
 {
 public:
@@ -36,11 +54,47 @@ public:
 	void activate(Hero**, Enemy**);
 };
 
+class ArAb2 : public Ability
+{
+public:
+	ArAb2();
+	~ArAb2() override;
+public:
+	void activate(Hero**, Enemy**);
+};
+
+class ArAb3 : public Ability
+{
+public:
+	ArAb3();
+	~ArAb3() override;
+public:
+	void activate(Hero**, Enemy**);
+};
+
 class PalAb1 : public Ability
 {
 public:
 	PalAb1();
 	~PalAb1() override;
+public:
+	void activate(Hero**, Enemy**);
+};
+
+class PalAb2 : public Ability
+{
+public:
+	PalAb2();
+	~PalAb2() override;
+public:
+	void activate(Hero**, Enemy**);
+};
+
+class PalAb3 : public Ability
+{
+public:
+	PalAb3();
+	~PalAb3() override;
 public:
 	void activate(Hero**, Enemy**);
 };

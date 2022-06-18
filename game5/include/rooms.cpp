@@ -51,30 +51,40 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			mPos = GetMousePosition();
 			if (IsKeyPressed(KEY_ENTER) && sel >= 1 && sel <= 4
 				|| IsMouseButtonPressed(MOUSE_BUTTON_LEFT)
-				&& (mPos.x >= 40 && mPos.x <= 220
+				&& (mPos.x >= 40 && mPos.x <= 280
 					&& mPos.y >= HEIGHT / 2 + 20 && mPos.y <= HEIGHT / 2 + 80
-					|| mPos.x >= 40 && mPos.x <= 220
+					|| mPos.x >= 40 && mPos.x <= 280
 					&& mPos.y >= HEIGHT / 2 + 120 && mPos.y <= HEIGHT / 2 + 180
-					|| mPos.x >= 40 && mPos.x <= 220
+					|| mPos.x >= 40 && mPos.x <= 280
 					&& mPos.y >= HEIGHT / 2 + 220 && mPos.y <= HEIGHT / 2 + 280
-				    || mPos.x >= 40 && mPos.x <= 220
-					&& mPos.y >= HEIGHT / 2 + 320 && mPos.y <= HEIGHT / 2 + 380))
+					&& !((*sv)->charact == 3 && (*h)->buffsN != 0)
+				    || mPos.x >= 40 && mPos.x <= 280
+					&& mPos.y >= HEIGHT / 2 + 320 && mPos.y <= HEIGHT / 2 + 380
+						&& (*h)->ability->curDelay == 0))
 			{
 				confirmation = true;
 			}
 			if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st, a2);
 			if (IsKeyPressed(KEY_DOWN) && sel < 4)
+			{
 				sel++;
+				if ((*h)->ability->curDelay > 0 && sel == 4) sel--;
+				if ((*sv)->charact == 3 && (*h)->buffsN != 0 && sel == 3 && (*h)->ability->curDelay == 0) sel++;
+				else if ((*sv)->charact == 3 && (*h)->buffsN != 0 && sel == 3) sel--;
+			}
 			if (IsKeyPressed(KEY_UP) && sel > 1)
+			{
 				sel--;
-			if (mPos.x >= 40 && mPos.x <= 220
+				if ((*sv)->charact == 3 && (*h)->buffsN != 0 && sel == 3) sel--;
+			}
+			if (mPos.x >= 40 && mPos.x <= 280
 				&& mPos.y >= HEIGHT / 2 + 20 && mPos.y <= HEIGHT / 2 + 80) sel = 1;
-			if (mPos.x >= 40 && mPos.x <= 220
+			if (mPos.x >= 40 && mPos.x <= 280
 				&& mPos.y >= HEIGHT / 2 + 120 && mPos.y <= HEIGHT / 2 + 180) sel = 2;
-			if (mPos.x >= 40 && mPos.x <= 220
+			if (mPos.x >= 40 && mPos.x <= 280
 				&& mPos.y >= HEIGHT / 2 + 220 && mPos.y <= HEIGHT / 2 + 280
 				&& !((*sv)->charact == 3 && (*h)->buffsN != 0)) sel = 3;
-			if (mPos.x >= 40 && mPos.x <= 220
+			if (mPos.x >= 40 && mPos.x <= 280
 				&& mPos.y >= HEIGHT / 2 + 320 && mPos.y <= HEIGHT / 2 + 380
 				&& (*h)->ability->curDelay == 0) sel = 4;
 			BeginDrawing();
@@ -82,68 +92,69 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			switch (sel)
 			{
 			case 1:
-				DrawRectangle(40, HEIGHT / 2 + 20, 180, 60, YELLOW);
+				DrawRectangle(40, HEIGHT / 2 + 20, 240, 60, YELLOW);
 				break;
 			case 2:
-				DrawRectangle(40, HEIGHT / 2 + 120, 180, 60, YELLOW);
+				DrawRectangle(40, HEIGHT / 2 + 120, 240, 60, YELLOW);
 				break;
 			case 3:
-				if(!((*sv)->charact == 3 && (*h)->buffsN != 0)) DrawRectangle(40, HEIGHT / 2 + 220, 180, 60, YELLOW);
+				if(!((*sv)->charact == 3 && (*h)->buffsN != 0)) DrawRectangle(40, HEIGHT / 2 + 220, 240, 60, YELLOW);
 				break;
 			case 4:
-				if((*h)->ability->curDelay == 0) DrawRectangle(40, HEIGHT / 2 + 320, 180, 60, YELLOW);
+				if((*h)->ability->curDelay == 0) DrawRectangle(40, HEIGHT / 2 + 320, 240, 60, YELLOW);
 				break;
 			}
 			DrawRectangleLines(20, HEIGHT / 2, WIDTH - 40, HEIGHT / 2 - 20, WHITE);
 
-			if ((*sv)->charact == 3 && (*h)->buffsN != 0) DrawRectangle(40, HEIGHT / 2 + 220, 180, 60, DARKGRAY);
-			if ((*h)->ability->curDelay != 0) DrawRectangle(40, HEIGHT / 2 + 320, 180, 60, DARKGRAY);
+			if ((*sv)->charact == 3 && (*h)->buffsN != 0) DrawRectangle(40, HEIGHT / 2 + 220, 240, 60, DARKGRAY);
+			if ((*h)->ability->curDelay != 0) DrawRectangle(40, HEIGHT / 2 + 320, 240, 60, DARKGRAY);
 
-			DrawRectangleLines(40, HEIGHT / 2 + 20, 180, 60, WHITE);
+			DrawRectangleLines(40, HEIGHT / 2 + 20, 240, 60, WHITE);
 			DrawText(*((*h)->nA), 45, HEIGHT / 2 + 38, 24, WHITE);
 
-			DrawRectangleLines(40, HEIGHT / 2 + 120, 180, 60, WHITE);
+			DrawRectangleLines(40, HEIGHT / 2 + 120, 240, 60, WHITE);
 			DrawText(*((*h)->hA), 45, HEIGHT / 2 + 138, 24, WHITE);
 
-			DrawRectangleLines(40, HEIGHT / 2 + 220, 180, 60, WHITE);
+			DrawRectangleLines(40, HEIGHT / 2 + 220, 240, 60, WHITE);
 			DrawText(*((*h)->sp), 45, HEIGHT / 2 + 238, 24, WHITE);
 
-			DrawRectangleLines(40, HEIGHT / 2 + 320, 180, 60, WHITE);
+			DrawRectangleLines(40, HEIGHT / 2 + 320, 240, 60, WHITE);
 			DrawText(*((*h)->ability->abTitle), 45, HEIGHT / 2 + 338, 24, WHITE);
 
-			DrawText(inf->username, 250, HEIGHT / 2 + 20, 24, WHITE);
+			DrawText(inf->username, 300, HEIGHT / 2 + 20, 24, WHITE);
 			switch ((*sv)->charact)
 			{
 			case 1:
-				DrawText("Swordsman", 250, HEIGHT / 2 + 60, 24, WHITE);
+				DrawText("Swordsman", 300, HEIGHT / 2 + 60, 24, WHITE);
 				break;
 			case 2:
-				DrawText("Archer", 250, HEIGHT / 2 + 60, 24, WHITE);
+				DrawText("Archer", 300, HEIGHT / 2 + 60, 24, WHITE);
 				break;
 			case 3:
-				DrawText("Palladin", 250, HEIGHT / 2 + 60, 24, WHITE);
+				DrawText("Palladin", 300, HEIGHT / 2 + 60, 24, WHITE);
 				break;
 			}
-			DrawText(TextFormat("HP: %d/%d", (*h)->hp, (*h)->maxHP), 250, HEIGHT / 2 + 100, 24, WHITE);
-			DrawText(TextFormat("Block: %d", (*h)->block), 250, HEIGHT / 2 + 140, 24, WHITE);
-			DrawText(TextFormat("Normal attack damage: %d", (*h)->minNDMG), 250, HEIGHT / 2 + 180, 24, WHITE);
-			DrawText(TextFormat("Heavy attack damage: %d", (*h)->minHDMG), 250, HEIGHT / 2 + 220, 24, WHITE);
-			DrawText(TextFormat("Special value: %d", (*h)->spValue), 250, HEIGHT / 2 + 260, 24, WHITE);
-			DrawText(TextFormat("Evasion: %d%", (*h)->evasion), 250, HEIGHT / 2 + 300, 24, WHITE);
-			DrawText(TextFormat("Buff duration: %d", (*h)->buffsN), 250, HEIGHT / 2 + 340, 24, WHITE);
-			DrawText(TextFormat("Gold: %d", (*h)->gold), 250, HEIGHT / 2 + 380, 24, WHITE);
-			DrawText(TextFormat("Effect in moves: %d", (*h)->ability->abilityVal), 600, HEIGHT / 2 + 100, 24, WHITE);
-			DrawText(TextFormat("Maximum delay: %d", (*h)->ability->maxDelay), 600, HEIGHT / 2 + 140, 24, WHITE);
-			DrawText(TextFormat("Current delay: %d", (*h)->ability->curDelay), 600, HEIGHT / 2 + 180, 24, WHITE);
+			DrawText(TextFormat("HP: %d/%d", (*h)->hp, (*h)->maxHP), 300, HEIGHT / 2 + 100, 24, WHITE);
+			DrawText(TextFormat("Block: %d", (*h)->block), 300, HEIGHT / 2 + 140, 24, WHITE);
+			DrawText(TextFormat("Normal attack damage: %d", (*h)->minNDMG), 300, HEIGHT / 2 + 180, 24, WHITE);
+			DrawText(TextFormat("Heavy attack damage: %d", (*h)->minHDMG), 300, HEIGHT / 2 + 220, 24, WHITE);
+			DrawText(TextFormat("Special value: %d", (*h)->spValue), 300, HEIGHT / 2 + 260, 24, WHITE);
+			DrawText(TextFormat("Evasion: %d%", (*h)->evasion), 300, HEIGHT / 2 + 300, 24, WHITE);
+			DrawText(TextFormat("Buff duration: %d", (*h)->buffsN), 300, HEIGHT / 2 + 340, 24, WHITE);
+			DrawText(TextFormat("Gold: %d", (*h)->gold), 300, HEIGHT / 2 + 380, 24, WHITE);
+			DrawText(TextFormat("Effect in moves: %d", (*h)->ability->abilityVal), 650, HEIGHT / 2 + 100, 24, WHITE);
+			DrawText(TextFormat("Maximum delay: %d", (*h)->ability->maxDelay), 650, HEIGHT / 2 + 140, 24, WHITE);
+			DrawText(TextFormat("Current delay: %d", (*h)->ability->curDelay), 650, HEIGHT / 2 + 180, 24, WHITE);
+			DrawText(TextFormat("Status duration: %d", (*h)->ability->statusDur), 650, HEIGHT / 2 + 220, 24, WHITE);
 
-			if(isBoss) DrawText("Boss", 1000, HEIGHT / 2 + 20, 24, WHITE);
-			else DrawText("Enemy", 1000, HEIGHT / 2 + 20, 24, WHITE);
-			DrawText(TextFormat("HP: %d/%d", (*en)->hp, (*en)->maxHP), 1000, HEIGHT / 2 + 60, 24, WHITE);
-			DrawText(TextFormat("Normal attack damage: %d", (*en)->minNDMG), 1000, HEIGHT / 2 + 100, 24, WHITE);
-			DrawText(TextFormat("Heavy attack damage: %d", (*en)->minHDMG), 1000, HEIGHT / 2 + 140, 24, WHITE);
-			DrawText(TextFormat("Special value: %d", (*en)->spValue), 1000, HEIGHT / 2 + 180, 24, WHITE);
-			DrawText(TextFormat("Gold reward: %d%", (*en)->rewGold), 1000, HEIGHT / 2 + 220, 24, WHITE);
-			DrawText(TextFormat("Current debuff value: %d%", (*en)->modInMoves), 1000, HEIGHT / 2 + 260, 24, WHITE);
+			if(isBoss) DrawText("Boss", 1050, HEIGHT / 2 + 20, 24, WHITE);
+			else DrawText("Enemy", 1050, HEIGHT / 2 + 20, 24, WHITE);
+			DrawText(TextFormat("HP: %d/%d", (*en)->hp, (*en)->maxHP), 1050, HEIGHT / 2 + 60, 24, WHITE);
+			DrawText(TextFormat("Normal attack damage: %d", (*en)->minNDMG), 1050, HEIGHT / 2 + 100, 24, WHITE);
+			DrawText(TextFormat("Heavy attack damage: %d", (*en)->minHDMG), 1050, HEIGHT / 2 + 140, 24, WHITE);
+			DrawText(TextFormat("Special value: %d", (*en)->spValue), 1050, HEIGHT / 2 + 180, 24, WHITE);
+			DrawText(TextFormat("Gold reward: %d%", (*en)->rewGold), 1050, HEIGHT / 2 + 220, 24, WHITE);
+			DrawText(TextFormat("Current debuff value: %d%", (*en)->modInMoves), 1050, HEIGHT / 2 + 260, 24, WHITE);
 
 			DrawText(TextFormat("Room %d%", (*sv)->roomNum), 20, 20, 30, WHITE);
 

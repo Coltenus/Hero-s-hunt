@@ -95,32 +95,48 @@ void Swordsman::Attack(ROB** res, Enemy** e)
 {
 	(*res)->hAct = 1;
 	(*res)->hVal = rand() % 10 + minNDMG;
-	if (rand() % 100 + 1 > mcN)
+	if (ability->numOfAb == 3 && ability->statusDur > 0)
 	{
 		(*e)->hp -= (*res)->hVal;
 		(*res)->hMiss = false;
 	}
+	else if (rand() % 100 + 1 > mcN)
+	{
+		if (ability->numOfAb == 2 && ability->statusDur > 0) (*res)->hVal *= 2;
+		(*e)->hp -= (*res)->hVal;
+		(*res)->hMiss = false;
+	}
 	else (*res)->hMiss = true;
+	if (ability->statusDur > 0) ability->statusDur--;
 }
 
 void Swordsman::HeavyAttack(ROB** res, Enemy** e)
 {
 	(*res)->hAct = 2;
 	(*res)->hVal = rand() % 10 + minHDMG;
-	if (rand() % 100 + 1 > mcH)
+	if (ability->numOfAb == 3 && ability->statusDur > 0)
 	{
 		(*e)->hp -= (*res)->hVal;
 		(*res)->hMiss = false;
 	}
+	else if (rand() % 100 + 1 > mcH)
+	{
+		if (ability->numOfAb == 2 && ability->statusDur > 0) (*res)->hVal *= 2;
+		(*e)->hp -= (*res)->hVal;
+		(*res)->hMiss = false;
+	}
 	else (*res)->hMiss = true;
+	if (ability->statusDur > 0) ability->statusDur--;
 }
 
 void Swordsman::Special(ROB** res)
 {
 	(*res)->hAct = 3;
-	block += spValue;
 	(*res)->hVal = spValue;
+	if (ability->numOfAb == 2 && ability->statusDur > 0) (*res)->hVal *= 2;
+	block += (*res)->hVal;
 	(*res)->hMiss = false;
+	if (ability->statusDur > 0) ability->statusDur--;
 }
 
 void Swordsman::setAbility(Ability* ab)
@@ -130,6 +146,7 @@ void Swordsman::setAbility(Ability* ab)
 
 void Swordsman::useAbility(ROB** res, Hero** h, Enemy** en)
 {
+	if (ability->statusDur > 0) ability->statusDur--;
 	ability->activate(h, en);
 	(*res)->hAct = 4;
 	(*res)->hVal = ability->abilityVal;
@@ -153,12 +170,14 @@ void Zombie::Attack(ROB** res, Hero** h)
 {
 	(*res)->enAct = 1;
 	(*res)->enVal = modAt * (rand() % 5 + minNDMG);
-	if ((*h)->charType == 1 && modInMoves > 0)
+	if ((*h)->charType == 2 && (*h)->ability->numOfAb == 3 && (*h)->ability->statusDur > 0)
+		(*res)->enVal = (short)((*res)->enVal / 2);
+	if ((*h)->charType == 1 && (*h)->ability->numOfAb == 1 && modInMoves > 0)
 	{
 		modInMoves--;
 		(*res)->enMiss = true;
 	}
-	else if ((*h)->charType == 3 && modInMoves > 0)
+	else if ((*h)->charType == 3 && (*h)->ability->numOfAb == 1 && modInMoves > 0)
 	{
 		if (rand() % 100 + 1 > 65)
 		{
@@ -196,7 +215,7 @@ void Zombie::Attack(ROB** res, Hero** h)
 		}
 		else (*res)->enMiss = true;
 	}
-	if ((*h)->charType == 2 && modInMoves > 0)
+	if ((*h)->charType == 2 && (*h)->ability->numOfAb == 1 && modInMoves > 0)
 	{
 		hp -= (short)(0.1 * maxHP);
 		modInMoves--;
@@ -207,12 +226,14 @@ void Zombie::HeavyAttack(ROB** res, Hero** h)
 {
 	(*res)->enAct = 2;
 	(*res)->enVal = modAt * (rand() % 5 + minHDMG);
-	if ((*h)->charType == 1 && modInMoves > 0)
+	if ((*h)->charType == 2 && (*h)->ability->numOfAb == 3 && (*h)->ability->statusDur > 0)
+		(*res)->enVal = (short)((*res)->enVal / 2);
+	if ((*h)->charType == 1 && (*h)->ability->numOfAb == 1 && modInMoves > 0)
 	{
 		modInMoves--;
 		(*res)->enMiss = true;
 	}
-	else if ((*h)->charType == 3 && modInMoves > 0)
+	else if ((*h)->charType == 3 && (*h)->ability->numOfAb == 1 && modInMoves > 0)
 	{
 		if (rand() % 100 + 1 > 65)
 		{
@@ -251,7 +272,7 @@ void Zombie::HeavyAttack(ROB** res, Hero** h)
 		}
 		else (*res)->enMiss = true;
 	}
-	if ((*h)->charType == 2 && modInMoves > 0)
+	if ((*h)->charType == 2 && (*h)->ability->numOfAb == 1 && modInMoves > 0)
 	{
 		hp -= (short)(0.1 * maxHP);
 		modInMoves--;
@@ -306,15 +327,18 @@ Archer::~Archer()
 
 void Archer::Attack(ROB** res, Enemy** e)
 {
+	static short shotCount;
 	static int* i;
 	static bool fl;
+	shotCount = 3;
 	fl = false;
 	if (buffsN > 0) buffsN--;
 	i = new int;
 	(*res)->hAct = 1;
 	(*res)->hVal = 0;
+	if (ability->numOfAb == 2 && ability->statusDur > 0) shotCount *= 2;
 	*i = 0;
-	while (*i < 3)
+	while (*i < shotCount)
 	{
 		if (rand() % 100 + 1 > mcN)
 		{
@@ -328,6 +352,7 @@ void Archer::Attack(ROB** res, Enemy** e)
 	else (*res)->hMiss = true;
 	delete i;
 	i = nullptr;
+	if (ability->statusDur > 0) ability->statusDur--;
 }
 
 void Archer::HeavyAttack(ROB** res, Enemy** e)
@@ -335,17 +360,28 @@ void Archer::HeavyAttack(ROB** res, Enemy** e)
 	if (buffsN > 0) buffsN--;
 	(*res)->hAct = 2;
 	(*res)->hVal = rand() % 4 + minHDMG;
+	if (ability->numOfAb == 2 && ability->statusDur > 0) (*res)->hVal *= 2;
 	(*e)->hp -= (*res)->hVal;
 	(*res)->hMiss = false;
+	if (ability->statusDur > 0) ability->statusDur--;
 }
 
 void Archer::Special(ROB** res)
 {
 	(*res)->hAct = 3;
 	if (buffsN > 0) buffsN--;
-	buffsN += spValue;
-	(*res)->hVal = spValue;
+	if (ability->numOfAb == 2 && ability->statusDur > 0)
+	{
+		buffsN += spValue * 2;
+		(*res)->hVal = spValue * 2;
+	}
+	else
+	{
+		buffsN += spValue;
+		(*res)->hVal = spValue;
+	}
 	(*res)->hMiss = false;
+	if (ability->statusDur > 0) ability->statusDur--;
 }
 
 void Archer::setAbility(Ability* ab)
@@ -355,6 +391,7 @@ void Archer::setAbility(Ability* ab)
 
 void Archer::useAbility(ROB** res, Hero** h, Enemy** en)
 {
+	if (ability->statusDur > 0) ability->statusDur--;
 	ability->activate(h, en);
 	(*res)->hAct = 4;
 	(*res)->hVal = ability->abilityVal;
@@ -372,8 +409,8 @@ Paladin::Paladin()
 	hA = new char* [14];
 	*hA = (char*)"Shield attack";
 	spValue = 15;
-	sp = new char* [15];
-	*sp = (char*)"God's blessing";
+	sp = new char* [16];
+	*sp = (char*)"Help from above";
 	maxHP = 100;
 	hp = 100;
 	gold = 0;
@@ -397,12 +434,19 @@ void Paladin::Attack(ROB** res, Enemy** e)
 	if (buffsN > 0) buffsN--;
 	(*res)->hAct = 1;
 	(*res)->hVal = rand() % 5 + minNDMG;
-	if (rand() % 100 + 1 > mcN)
+	if (ability->numOfAb == 2 && ability->statusDur > 0)
+	{
+		(*res)->hVal *= 2;
+		(*e)->hp -= (*res)->hVal;
+		(*res)->hMiss = false;
+	}
+	else if (rand() % 100 + 1 > mcN)
 	{
 		(*e)->hp -= (*res)->hVal;
 		(*res)->hMiss = false;
 	}
 	else (*res)->hMiss = true;
+	if (ability->statusDur > 0) ability->statusDur--;
 }
 
 void Paladin::HeavyAttack(ROB** res, Enemy** e)
@@ -410,24 +454,37 @@ void Paladin::HeavyAttack(ROB** res, Enemy** e)
 	if (buffsN > 0) buffsN--;
 	(*res)->hAct = 2;
 	(*res)->hVal = minHDMG;
-	if (rand() % 100 + 1 > mcH)
+	(*res)->hAdd = (short)(minHDMG * 0.3);
+	if (ability->numOfAb == 2 && ability->statusDur > 0)
+	{
+		(*res)->hVal *= 2;
+		(*e)->hp -= (*res)->hVal;
+		(*res)->hAdd *= 2;
+		(*res)->hMiss = false;
+	}
+	else if (rand() % 100 + 1 > mcH)
 	{
 		(*e)->hp -= (*res)->hVal;
 		(*res)->hMiss = false;
 	}
 	else (*res)->hMiss = true;
-	(*res)->hAdd = (short)(minHDMG * 0.3);
 	block += (*res)->hAdd;
+	if (ability->statusDur > 0) ability->statusDur--;
 }
 
 void Paladin::Special(ROB** res)
 {
 	(*res)->hVal = rand() % (spValue + 1);
+	if (ability->numOfAb == 2 && ability->statusDur > 0)
+	{
+		(*res)->hVal = spValue * 2;
+	}
 	hp += (*res)->hVal;
 	if (hp > maxHP) hp = maxHP;
 	(*res)->hAct = 3;
 	(*res)->hMiss = false;
 	buffsN = 3;
+	if (ability->statusDur > 0) ability->statusDur--;
 }
 
 void Paladin::setAbility(Ability* ab)
@@ -437,6 +494,7 @@ void Paladin::setAbility(Ability* ab)
 
 void Paladin::useAbility(ROB** res, Hero** h, Enemy** en)
 {
+	if (ability->statusDur > 0) ability->statusDur--;
 	ability->activate(h, en);
 	(*res)->hAct = 4;
 	(*res)->hVal = ability->abilityVal;
@@ -450,6 +508,7 @@ Ability::Ability()
 	curDelay = 0;
 	maxDelay = 0;
 	numOfAb = 0;
+	statusDur = 0;
 	abTitle = nullptr;
 }
 
@@ -469,6 +528,7 @@ SwAb1::SwAb1()
 	abilityVal = 2;
 	addAbilityVal = 0;
 	numOfAb = 1;
+	statusDur = 0;
 	abTitle = new char* [7];
 	*abTitle = (char*)"Disarm";
 }
@@ -483,7 +543,7 @@ void SwAb1::activate(Hero** h, Enemy** en)
 {
 	if (curDelay < 0) curDelay = 0;
 	if (curDelay > 0) curDelay--;
-	else if ((*h)->ability->numOfAb == 1)
+	else
 	{
 		(*en)->modInMoves = abilityVal;
 		curDelay = maxDelay;
@@ -497,6 +557,7 @@ ArAb1::ArAb1()
 	abilityVal = 2;
 	addAbilityVal = 0;
 	numOfAb = 1;
+	statusDur = 0;
 	abTitle = new char* [9];
 	*abTitle = (char*)"Bleeding";
 }
@@ -511,7 +572,7 @@ void ArAb1::activate(Hero** h, Enemy** en)
 {
 	if (curDelay < 0) curDelay = 0;
 	if (curDelay > 0) curDelay--;
-	else if ((*h)->ability->numOfAb == 1)
+	else
 	{
 		(*en)->modInMoves = abilityVal;
 		curDelay = maxDelay;
@@ -525,6 +586,7 @@ PalAb1::PalAb1()
 	abilityVal = 3;
 	addAbilityVal = 0;
 	numOfAb = 1;
+	statusDur = 0;
 	abTitle = new char* [16];
 	*abTitle = (char*)"God's infection";
 }
@@ -539,9 +601,188 @@ void PalAb1::activate(Hero** h, Enemy** en)
 {
 	if (curDelay < 0) curDelay = 0;
 	if (curDelay > 0) curDelay--;
-	else if((*h)->ability->numOfAb == 1)
+	else
 	{
 		(*en)->modInMoves = abilityVal;
+		curDelay = maxDelay;
+	}
+}
+
+SwAb2::SwAb2()
+{
+	curDelay = 0;
+	maxDelay = 6;
+	abilityVal = 2;
+	addAbilityVal = 0;
+	numOfAb = 2;
+	statusDur = 0;
+	abTitle = new char* [12];
+	*abTitle = (char*)"Enchantment";
+}
+
+SwAb2::~SwAb2()
+{
+	delete[] abTitle;
+	abTitle = nullptr;
+}
+
+void SwAb2::activate(Hero** h, Enemy** en)
+{
+	if (curDelay < 0) curDelay = 0;
+	if (curDelay > 0) curDelay--;
+	else
+	{
+		statusDur = abilityVal;
+		curDelay = maxDelay;
+	}
+}
+
+SwAb3::SwAb3()
+{
+	curDelay = 0;
+	maxDelay = 5;
+	abilityVal = 1;
+	addAbilityVal = 0;
+	numOfAb = 3;
+	statusDur = 0;
+	abTitle = new char* [18];
+	*abTitle = (char*)"Make the strategy";
+}
+
+SwAb3::~SwAb3()
+{
+	delete[] abTitle;
+	abTitle = nullptr;
+}
+
+void SwAb3::activate(Hero** h, Enemy** en)
+{
+	if (curDelay < 0) curDelay = 0;
+	if (curDelay > 0) curDelay--;
+	else
+	{
+		statusDur = abilityVal;
+		curDelay = maxDelay;
+	}
+}
+
+ArAb2::ArAb2()
+{
+	curDelay = 0;
+	maxDelay = 4;
+	abilityVal = 1;
+	addAbilityVal = 0;
+	numOfAb = 2;
+	statusDur = 0;
+	abTitle = new char* [15];
+	*abTitle = (char*)"Double Trouble";
+}
+
+ArAb2::~ArAb2()
+{
+	delete[] abTitle;
+	abTitle = nullptr;
+}
+
+void ArAb2::activate(Hero** h, Enemy** en)
+{
+	if (curDelay < 0) curDelay = 0;
+	if (curDelay > 0) curDelay--;
+	else
+	{
+		statusDur = abilityVal;
+		curDelay = maxDelay;
+	}
+}
+
+ArAb3::ArAb3()
+{
+	curDelay = 0;
+	maxDelay = 6;
+	abilityVal = 2;
+	addAbilityVal = 0;
+	numOfAb = 3;
+	statusDur = 0;
+	abTitle = new char* [9];
+	*abTitle = (char*)"Weakness";
+}
+
+ArAb3::~ArAb3()
+{
+	delete[] abTitle;
+	abTitle = nullptr;
+}
+
+void ArAb3::activate(Hero** h, Enemy** en)
+{
+	if (curDelay < 0) curDelay = 0;
+	if (curDelay > 0) curDelay--;
+	else
+	{
+		(*en)->modInMoves = abilityVal;
+		curDelay = maxDelay;
+	}
+}
+
+PalAb2::PalAb2()
+{
+	curDelay = 0;
+	maxDelay = 8;
+	abilityVal = 1;
+	addAbilityVal = 0;
+	numOfAb = 2;
+	statusDur = 0;
+	abTitle = new char* [15];
+	*abTitle = (char*)"God's blessing";
+}
+
+PalAb2::~PalAb2()
+{
+	delete[] abTitle;
+	abTitle = nullptr;
+}
+
+void PalAb2::activate(Hero** h, Enemy** en)
+{
+	if (curDelay < 0) curDelay = 0;
+	if (curDelay > 0) curDelay--;
+	else
+	{
+		statusDur = abilityVal;
+		curDelay = maxDelay;
+	}
+}
+
+PalAb3::PalAb3()
+{
+	curDelay = 0;
+	maxDelay = 8;
+	abilityVal = 0;
+	addAbilityVal = 0;
+	numOfAb = 3;
+	statusDur = 0;
+	abTitle = new char* [8];
+	*abTitle = (char*)"HP swap";
+}
+
+PalAb3::~PalAb3()
+{
+	delete[] abTitle;
+	abTitle = nullptr;
+}
+
+void PalAb3::activate(Hero** h, Enemy** en)
+{
+	static short buf;
+	if (curDelay < 0) curDelay = 0;
+	if (curDelay > 0) curDelay--;
+	else
+	{
+		buf = (*h)->hp;
+		(*h)->hp = (*en)->hp;
+		(*en)->hp = buf;
+		if ((*h)->hp > (*h)->maxHP) (*h)->hp = (*h)->maxHP;
+		if ((*en)->hp > (*en)->maxHP) (*en)->hp = (*en)->maxHP;
 		curDelay = maxDelay;
 	}
 }

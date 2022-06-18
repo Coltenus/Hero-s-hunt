@@ -13,7 +13,7 @@ typedef struct _save
 {
 	struct chOfStats
 	{
-		short dmgN, dmgH, hp, maxHP, evasion, spValue, buffN, block, curDelay;
+		short dmgN, dmgH, hp, maxHP, evasion, spValue, buffN, block, curDelay, statDur;
 	};
 	struct enSt
 	{
