@@ -870,7 +870,7 @@ Ability* SelectAbility(short h, bool* shouldExit)
 					DrawText("Next two moves enemy will\nattack with 0.5x damage", WIDTH / 2 + 200, HEIGHT / 2 + 20, 30, WHITE);
 					break;
 				case 3:
-					DrawText("Swap your hp with enemy", WIDTH / 2 + 200, HEIGHT / 2 + 20, 30, WHITE);
+					DrawText("Deal damage or heal you and\nyour enemy by random value.\nAbility's value its maximum.", WIDTH / 2 + 200, HEIGHT / 2 + 20, 30, WHITE);
 					break;
 				}
 				break;

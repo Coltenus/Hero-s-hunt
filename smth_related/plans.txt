@@ -3,3 +3,8 @@ next floor(new bg, new monsters)
 
 shopkeeper animation
 icons of battle values
+
+new enemy Rogue:
+knife swing(normal attack)
+fast attack(more accurate attack with less dmg)
+

@@ -169,7 +169,9 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			DrawText(TextFormat("Evasion: %d%", (*h)->evasion), 300, HEIGHT / 2 + 300, 24, WHITE);
 			DrawText(TextFormat("Buff duration: %d", (*h)->buffsN), 300, HEIGHT / 2 + 340, 24, WHITE);
 			DrawText(TextFormat("Gold: %d", (*h)->gold), 300, HEIGHT / 2 + 380, 24, WHITE);
-			DrawText(TextFormat("Effect in moves: %d", (*h)->ability->abilityVal), 650, HEIGHT / 2 + 100, 24, WHITE);
+			if (!((*sv)->charact == 3 && (*sv)->ability == 3))
+				DrawText(TextFormat("Effect in moves: %d", (*h)->ability->abilityVal), 650, HEIGHT / 2 + 100, 24, WHITE);
+			else DrawText(TextFormat("Fourth ability's value: %d", (*h)->ability->abilityVal), 650, HEIGHT / 2 + 100, 24, WHITE);
 			DrawText(TextFormat("Maximum delay: %d", (*h)->ability->maxDelay), 650, HEIGHT / 2 + 140, 24, WHITE);
 			DrawText(TextFormat("Current delay: %d", (*h)->ability->curDelay), 650, HEIGHT / 2 + 180, 24, WHITE);
 			DrawText(TextFormat("Status duration: %d", (*h)->ability->statusDur), 650, HEIGHT / 2 + 220, 24, WHITE);
@@ -265,14 +267,17 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 				break;
 			case 4:
 				DrawText(*((*h)->ability->abTitle), WIDTH / 2 - 65, HEIGHT / 2 - 250, 30, WHITE);
-				DrawText(TextFormat("for %d moves", res->hVal), WIDTH / 2 - 75, HEIGHT / 2 - 200, 30, WHITE);
+				if (!((*sv)->charact == 3 && (*sv)->ability == 3))
+					DrawText(TextFormat("for %d moves", res->hVal), WIDTH / 2 - 75, HEIGHT / 2 - 200, 30, WHITE);
+				else DrawText(TextFormat("hits or heals both of you by value of %d", res->hVal)
+					, WIDTH / 2 - 200, HEIGHT / 2 - 200, 30, WHITE);
 				break;
 			}
 			if (!res->hMiss && res->hAct != 3 && res->hAct != 4) DrawText(TextFormat("and dealt %d damage", res->hVal)
 				, WIDTH / 2 - 100, HEIGHT / 2 - 200, 30, WHITE);
 			else if(!res->hMiss && res->hAct != 4) DrawText(TextFormat("and get %d buff of this hero", res->hVal)
 				, WIDTH / 2 - 170, HEIGHT / 2 - 200, 30, WHITE);
-			if ((*sv)->charact == 3 && res->hAct == 2)
+			else if ((*sv)->charact == 3 && res->hAct == 2)
 				DrawText(TextFormat("and gained shield by value of %d", res->hAdd)
 					, WIDTH / 2 - 200, HEIGHT / 2 - 150, 30, WHITE);
 			DrawText("Enemy", WIDTH / 2 - 20, HEIGHT / 2 - 50, 30, WHITE);

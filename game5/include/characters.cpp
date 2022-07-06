@@ -778,12 +778,12 @@ PalAb3::PalAb3()
 {
 	curDelay = 0;
 	maxDelay = 8;
-	abilityVal = 0;
+	abilityVal = 40;
 	addAbilityVal = 0;
 	numOfAb = 3;
 	statusDur = 0;
-	abTitle = new char* [8];
-	*abTitle = (char*)"HP swap";
+	abTitle = new char* [17];
+	*abTitle = (char*)"Chaotic offering";
 }
 
 PalAb3::~PalAb3()
@@ -799,11 +799,14 @@ void PalAb3::activate(Hero** h, Enemy** en)
 	if (curDelay > 0) curDelay--;
 	else
 	{
-		buf = (*h)->hp;
-		(*h)->hp = (*en)->hp;
-		(*en)->hp = buf;
+		buf = rand() % (abilityVal * 2 + 1) - abilityVal;
+		(*h)->hp += buf;
 		if ((*h)->hp > (*h)->maxHP) (*h)->hp = (*h)->maxHP;
+		else if ((*h)->hp <= 0) (*h)->hp = 1;
+		buf = rand() % (abilityVal * 2 + 1) - abilityVal;
+		(*en)->hp += buf;
 		if ((*en)->hp > (*en)->maxHP) (*en)->hp = (*en)->maxHP;
+		else if ((*en)->hp <= 0) (*en)->hp = 1;
 		curDelay = maxDelay;
 	}
 }
