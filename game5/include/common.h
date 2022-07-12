@@ -41,6 +41,6 @@ typedef struct _info
 
 typedef struct _resultOfBattle
 {
-	short hAct, enAct, hVal, enVal, hAdd, enAdd;
+	short hp, block, bDur, curDel, stDur, enHP, enDB;
 	bool hMiss, enMiss;
 }ROB;

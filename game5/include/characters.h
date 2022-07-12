@@ -13,7 +13,7 @@ private:
 public:
 	Item();
 	~Item();
-	virtual void activate(Hero**, Enemy**) = 0;
+	virtual void activate(Hero**, Enemy**, ROB**) = 0;
 	void setVal(short);
 	void setName(char*);
 	void setNum(short);
@@ -28,7 +28,7 @@ class Healing : public Item
 public:
 	Healing(short);
 	~Healing();
-	void activate(Hero**, Enemy**) override;
+	void activate(Hero**, Enemy**, ROB**) override;
 };
 
 class Block : public Item
@@ -36,7 +36,7 @@ class Block : public Item
 public:
 	Block(short);
 	~Block();
-	void activate(Hero**, Enemy**) override;
+	void activate(Hero**, Enemy**, ROB**) override;
 };
 
 class DmgPotion : public Item
@@ -44,7 +44,7 @@ class DmgPotion : public Item
 public:
 	DmgPotion(short);
 	~DmgPotion();
-	void activate(Hero**, Enemy**) override;
+	void activate(Hero**, Enemy**, ROB**) override;
 };
 
 class UpMaxHP : public Item
@@ -52,7 +52,7 @@ class UpMaxHP : public Item
 public:
 	UpMaxHP(short);
 	~UpMaxHP();
-	void activate(Hero**, Enemy**) override;
+	void activate(Hero**, Enemy**, ROB**) override;
 };
 
 class Ability
@@ -65,7 +65,7 @@ public:
 	Ability();
 	virtual ~Ability();
 public:
-	virtual void activate(Hero**, Enemy**) = 0;
+	virtual void activate(Hero**, Enemy**, ROB**) = 0;
 };
 
 class SwAb1 : public Ability
@@ -74,7 +74,7 @@ public:
 	SwAb1();
 	~SwAb1() override;
 public:
-	void activate(Hero**, Enemy**);
+	void activate(Hero**, Enemy**, ROB**);
 };
 
 class SwAb2 : public Ability
@@ -83,7 +83,7 @@ public:
 	SwAb2();
 	~SwAb2() override;
 public:
-	void activate(Hero**, Enemy**);
+	void activate(Hero**, Enemy**, ROB**);
 };
 
 class SwAb3 : public Ability
@@ -92,7 +92,7 @@ public:
 	SwAb3();
 	~SwAb3() override;
 public:
-	void activate(Hero**, Enemy**);
+	void activate(Hero**, Enemy**, ROB**);
 };
 
 class ArAb1 : public Ability
@@ -101,7 +101,7 @@ public:
 	ArAb1();
 	~ArAb1() override;
 public:
-	void activate(Hero**, Enemy**);
+	void activate(Hero**, Enemy**, ROB**);
 };
 
 class ArAb2 : public Ability
@@ -110,7 +110,7 @@ public:
 	ArAb2();
 	~ArAb2() override;
 public:
-	void activate(Hero**, Enemy**);
+	void activate(Hero**, Enemy**, ROB**);
 };
 
 class ArAb3 : public Ability
@@ -119,7 +119,7 @@ public:
 	ArAb3();
 	~ArAb3() override;
 public:
-	void activate(Hero**, Enemy**);
+	void activate(Hero**, Enemy**, ROB**);
 };
 
 class PalAb1 : public Ability
@@ -128,7 +128,7 @@ public:
 	PalAb1();
 	~PalAb1() override;
 public:
-	void activate(Hero**, Enemy**);
+	void activate(Hero**, Enemy**, ROB**);
 };
 
 class PalAb2 : public Ability
@@ -137,7 +137,7 @@ public:
 	PalAb2();
 	~PalAb2() override;
 public:
-	void activate(Hero**, Enemy**);
+	void activate(Hero**, Enemy**, ROB**);
 };
 
 class PalAb3 : public Ability
@@ -146,7 +146,7 @@ public:
 	PalAb3();
 	~PalAb3() override;
 public:
-	void activate(Hero**, Enemy**);
+	void activate(Hero**, Enemy**, ROB**);
 };
 
 class Hero
@@ -161,7 +161,7 @@ public:
 	virtual void setAbility(Ability*) = 0;
 	virtual void useAbility(ROB**, Hero**, Enemy**) = 0;
 	void setItem(Item*);
-	void useItem(Hero**, Enemy**, short);
+	void useItem(Hero**, Enemy**, short, ROB**);
 	void clearSlot(short);
 	short findFreeSlot();
 public:
