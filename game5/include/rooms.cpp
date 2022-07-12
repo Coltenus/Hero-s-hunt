@@ -14,9 +14,6 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 	static Rectangle frameRec;
 	static int frameSpeed, frameCounter, currentFrame;
 	static ROB* res;
-	static bool isThFree1, isThFree2;
-	isThFree1 = true;
-	isThFree2 = true;
 	res = new ROB;
 	auto clearRes = []()
 	{
