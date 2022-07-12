@@ -198,10 +198,8 @@ void Zombie::Attack(ROB** res, Hero** h)
 {
 	static short dmg;
 	dmg = modAt * (rand() % 5 + minNDMG);
-	(*res)->hp += dmg;
 	if ((*h)->charType == 2 && (*h)->ability->numOfAb == 3 && (*h)->ability->statusDur > 0)
 	{
-		(*res)->hp -= dmg;
 		dmg /= 2;
 		(*res)->hp += dmg;
 	}
@@ -209,7 +207,6 @@ void Zombie::Attack(ROB** res, Hero** h)
 	{
 		modInMoves--;
 		(*res)->enMiss = true;
-		(*res)->hp = 0;
 	}
 	else if ((*h)->charType == 3 && (*h)->ability->numOfAb == 1 && modInMoves > 0)
 	{
@@ -220,6 +217,7 @@ void Zombie::Attack(ROB** res, Hero** h)
 			{
 				hp -= (short)(0.25 * (*h)->block);
 				(*h)->hp += (*h)->block;
+				(*res)->hp -= (*h)->block;
 				(*h)->block = 0;
 			}
 		}
@@ -227,7 +225,6 @@ void Zombie::Attack(ROB** res, Hero** h)
 		{
 			hp -= dmg;
 			(*res)->enHP += dmg;
-			(*res)->hp = 0;
 		}
 		modInMoves--;
 		(*res)->enMiss = false;
@@ -242,6 +239,7 @@ void Zombie::Attack(ROB** res, Hero** h)
 				if ((*h)->block < 0)
 				{
 					(*h)->hp += (*h)->block;
+					(*res)->hp -= (*h)->block;
 					(*h)->block = 0;
 				}
 				(*res)->enMiss = false;
@@ -253,6 +251,7 @@ void Zombie::Attack(ROB** res, Hero** h)
 	if ((*h)->charType == 2 && (*h)->ability->numOfAb == 1 && modInMoves > 0)
 	{
 		hp -= (short)(0.1 * maxHP);
+		(*res)->enHP += (short)(0.1 * maxHP);
 		modInMoves--;
 	}
 }
@@ -261,10 +260,8 @@ void Zombie::HeavyAttack(ROB** res, Hero** h)
 {
 	static short dmg;
 	dmg = modAt * (rand() % 5 + minHDMG);
-	(*res)->hp += dmg;
 	if ((*h)->charType == 2 && (*h)->ability->numOfAb == 3 && (*h)->ability->statusDur > 0)
 	{
-		(*res)->hp -= dmg;
 		dmg /= 2;
 		(*res)->hp += dmg;
 	}
@@ -282,13 +279,13 @@ void Zombie::HeavyAttack(ROB** res, Hero** h)
 			{
 				hp -= (short)(0.25 * (*h)->block);
 				(*h)->hp += (*h)->block;
+				(*res)->hp -= (*h)->block;
 				(*h)->block = 0;
 			}
 		}
 		else
 		{
 			hp -= dmg;
-			(*res)->hp -= dmg;
 			(*res)->enHP += dmg;
 			
 		}
@@ -306,6 +303,7 @@ void Zombie::HeavyAttack(ROB** res, Hero** h)
 				{
 					hp -= (short)(0.25 * (*h)->block);
 					(*h)->hp += (*h)->block;
+					(*res)->hp -= (*h)->block;
 					(*h)->block = 0;
 				}
 				(*res)->enMiss = false;
@@ -317,17 +315,18 @@ void Zombie::HeavyAttack(ROB** res, Hero** h)
 	if ((*h)->charType == 2 && (*h)->ability->numOfAb == 1 && modInMoves > 0)
 	{
 		hp -= (short)(0.1 * maxHP);
+		(*res)->enHP -= (short)(0.1 * maxHP);
 		modInMoves--;
 	}
 }
 
 void Zombie::Special(ROB** res)
 {
-	(*res)->enHP -= spValue;
 	if (modInMoves > 0) modInMoves--;
 	if (rand() % 100 + 1 > 30)
 	{
 		hp += spValue;
+		(*res)->enHP -= spValue;
 		(*res)->enMiss = false;
 	}
 	else (*res)->enMiss = true;

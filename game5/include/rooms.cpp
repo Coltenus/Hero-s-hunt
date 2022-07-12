@@ -14,7 +14,23 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 	static Rectangle frameRec;
 	static int frameSpeed, frameCounter, currentFrame;
 	static ROB* res;
+	static bool isThFree1, isThFree2;
+	isThFree1 = true;
+	isThFree2 = true;
 	res = new ROB;
+	auto clearRes = []()
+	{
+		res->bDur = 0;
+		res->block = 0;
+		res->curDel = 0;
+		res->enDB = 0;
+		res->enHP = 0;
+		res->enMiss = true;
+		res->hMiss = true;
+		res->hp = 0;
+		res->stDur = 0;
+	};
+	clearRes();
 	frameCounter = 0;
 	frameSpeed = 3;
 	currentFrame = 0;
@@ -105,7 +121,7 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 					&& mPos.y >= HEIGHT / 2 + 315 && mPos.y <= HEIGHT / 2 + 385
 					&& (*h)->items[1]->getNum() != 0))
 			{
-				(*h)->useItem(h, en, sel - 5);
+				(*h)->useItem(h, en, sel - 5, &res);
 				sel = 0;
 			}
 			BeginDrawing();
@@ -176,6 +192,25 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			DrawText(TextFormat("Current delay: %d", (*h)->ability->curDelay), 650, HEIGHT / 2 + 180, 24, WHITE);
 			DrawText(TextFormat("Status duration: %d", (*h)->ability->statusDur), 650, HEIGHT / 2 + 220, 24, WHITE);
 
+			if (res != nullptr)
+			{
+				if (res->hp < 0) DrawText(TextFormat("%d", -(res->hp)), 600, HEIGHT / 2 + 100, 24, GREEN);
+				else if (res->hp > 0) DrawText(TextFormat("%d", -(res->hp)), 600, HEIGHT / 2 + 100, 24, RED);
+
+				if(res->block != 0) DrawText(TextFormat("%d", res->block), 600, HEIGHT / 2 + 140, 24, GREEN);
+
+				if(res->bDur != 0) DrawText(TextFormat("%d", res->bDur), 600, HEIGHT / 2 + 340, 24, GREEN);
+
+				if (res->curDel != 0) DrawText(TextFormat("%d", res->curDel), 950, HEIGHT / 2 + 180, 24, RED);
+
+				if (res->stDur != 0) DrawText(TextFormat("%d", res->stDur), 950, HEIGHT / 2 + 220, 24, GREEN);
+
+				if (res->enHP < 0) DrawText(TextFormat("%d", -(res->enHP)), 1375, HEIGHT / 2 + 60, 24, GREEN);
+				else if (res->enHP > 0) DrawText(TextFormat("%d", -(res->enHP)), 1375, HEIGHT / 2 + 60, 24, RED);
+
+				if (res->enDB != 0) DrawText(TextFormat("%d", res->enDB), 1375, HEIGHT / 2 + 260, 24, RED);
+			}
+
 			if(isBoss) DrawText("Boss", 1050, HEIGHT / 2 + 20, 24, WHITE);
 			else DrawText("Enemy", 1050, HEIGHT / 2 + 20, 24, WHITE);
 			DrawText(TextFormat("HP: %d/%d", (*en)->hp, (*en)->maxHP), 1050, HEIGHT / 2 + 60, 24, WHITE);
@@ -202,6 +237,7 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			if (WindowShouldClose()) shouldExit = true;
 			if (shouldExit) break;
 		}
+		clearRes();
 		if (shouldExit) break;
 		switch (sel)
 		{
@@ -248,53 +284,6 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 		if (sel >= 1 && sel <= 40) (*en)->Attack(&res, h);
 		else if (sel >= 41 && sel >= 80) (*en)->HeavyAttack(&res, h);
 		else (*en)->Special(&res);
-		while(!IsKeyPressed(KEY_SPACE) && !IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-		{
-			if (IsKeyPressed(KEY_I)) shouldExit = OpenInfo(inf, sv, st, a2);
-			BeginDrawing();
-			if(res->hMiss) DrawText("Hero missed with", WIDTH / 2 - 85, HEIGHT / 2 - 300, 30, WHITE);
-			else DrawText("Hero has done", WIDTH / 2 - 80, HEIGHT / 2 - 300, 30, WHITE);
-			switch (res->hAct)
-			{
-			case 1:
-				DrawText(*((*h)->nA), WIDTH / 2 - 65, HEIGHT / 2 - 250, 30, WHITE);
-				break;
-			case 2:
-				DrawText(*((*h)->hA), WIDTH / 2 - 65, HEIGHT / 2 - 250, 30, WHITE);
-				break;
-			case 3:
-				DrawText(*((*h)->sp), WIDTH / 2 - 65, HEIGHT / 2 - 250, 30, WHITE);
-				break;
-			case 4:
-				DrawText(*((*h)->ability->abTitle), WIDTH / 2 - 65, HEIGHT / 2 - 250, 30, WHITE);
-				if (!((*sv)->charact == 3 && (*sv)->ability == 3))
-					DrawText(TextFormat("for %d moves", res->hVal), WIDTH / 2 - 75, HEIGHT / 2 - 200, 30, WHITE);
-				else DrawText(TextFormat("hits or heals both of you by value of %d", res->hVal)
-					, WIDTH / 2 - 200, HEIGHT / 2 - 200, 30, WHITE);
-				break;
-			}
-			if (!res->hMiss && res->hAct != 3 && res->hAct != 4) DrawText(TextFormat("and dealt %d damage", res->hVal)
-				, WIDTH / 2 - 100, HEIGHT / 2 - 200, 30, WHITE);
-			else if(!res->hMiss && res->hAct != 4) DrawText(TextFormat("and get %d buff of this hero", res->hVal)
-				, WIDTH / 2 - 170, HEIGHT / 2 - 200, 30, WHITE);
-			else if ((*sv)->charact == 3 && res->hAct == 2)
-				DrawText(TextFormat("and gained shield by value of %d", res->hAdd)
-					, WIDTH / 2 - 200, HEIGHT / 2 - 150, 30, WHITE);
-			DrawText("Enemy", WIDTH / 2 - 20, HEIGHT / 2 - 50, 30, WHITE);
-			if (!res->enMiss && res->enAct != 3) DrawText(TextFormat("dealt %d damage", res->enVal)
-				, WIDTH / 2 - 80, HEIGHT / 2, 30, WHITE);
-			else if (!res->enMiss) DrawText(TextFormat("healed by value of %d", res->enVal)
-				, WIDTH / 2 - 110, HEIGHT / 2, 30, WHITE);
-			else if(res->enMiss && res->enAct != 3) DrawText("missed"
-				, WIDTH / 2 - 25, HEIGHT / 2, 30, WHITE);
-			else DrawText("couldn't heal" , WIDTH / 2 - 60, HEIGHT / 2, 30, WHITE);
-			DrawText("Press Space to continue", WIDTH / 2 - 150, HEIGHT / 2 + 150, 30, WHITE);
-			ClearBackground(DARKBLUE);
-			EndDrawing();
-			(*a2).update();
-			if (WindowShouldClose()) shouldExit = true;
-			if (shouldExit) break;
-		}
 		if (shouldExit) break;
 	}
 	UnloadTexture(enemyTexture);
