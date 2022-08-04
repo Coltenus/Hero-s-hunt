@@ -1,4 +1,4 @@
-# rougelike1
+# Hero's hunt
 
 ## A game where you can fight the monsters and become strong with each room you pass
 
