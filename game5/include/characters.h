@@ -1,59 +1,10 @@
 #pragma once
 
 #include "common.h"
+#include "items.h"
 
 class Hero;
 class Enemy;
-
-class Item
-{
-private:
-	short val, numOfItem;
-	char** itemTitle;
-public:
-	Item();
-	~Item();
-	virtual void activate(Hero**, Enemy**, ROB**) = 0;
-	void setVal(short);
-	void setName(char*);
-	void setNum(short);
-	short getVal();
-	char** getName();
-	short getNum();
-	void eraseName();
-};
-
-class Healing : public Item
-{
-public:
-	Healing(short);
-	~Healing();
-	void activate(Hero**, Enemy**, ROB**) override;
-};
-
-class Block : public Item
-{
-public:
-	Block(short);
-	~Block();
-	void activate(Hero**, Enemy**, ROB**) override;
-};
-
-class DmgPotion : public Item
-{
-public:
-	DmgPotion(short);
-	~DmgPotion();
-	void activate(Hero**, Enemy**, ROB**) override;
-};
-
-class UpMaxHP : public Item
-{
-public:
-	UpMaxHP(short);
-	~UpMaxHP();
-	void activate(Hero**, Enemy**, ROB**) override;
-};
 
 class Ability
 {
@@ -177,21 +128,6 @@ public:
 	short slotN;
 };
 
-class Enemy
-{
-public:
-	Enemy();
-public:
-	virtual void Attack(ROB**, Hero**) = 0;
-	virtual void HeavyAttack(ROB**, Hero**) = 0;
-	virtual void Special(ROB**) = 0;
-public:
-	short maxHP, hp, rewGold, modAt, modInMoves, enemType;
-	int minNDMG;
-	int minHDMG;
-	int spValue;
-};
-
 class Swordsman : public Hero
 {
 public:
@@ -202,15 +138,6 @@ public:
 	void Special(ROB**) override;
 	void setAbility(Ability*) override;
 	void useAbility(ROB**, Hero**, Enemy**) override;
-};
-
-class Zombie : public Enemy
-{
-public:
-	Zombie(unsigned short);
-	void Attack(ROB**, Hero**) override;
-	void HeavyAttack(ROB**, Hero**) override;
-	void Special(ROB**) override;
 };
 
 class Archer : public Hero
@@ -235,4 +162,37 @@ public:
 	void Special(ROB**) override;
 	void setAbility(Ability*) override;
 	void useAbility(ROB**, Hero**, Enemy**) override;
+};
+
+class Enemy
+{
+public:
+	Enemy();
+public:
+	virtual void Attack(ROB**, Hero**) = 0;
+	virtual void HeavyAttack(ROB**, Hero**) = 0;
+	virtual void Special(ROB**) = 0;
+public:
+	short maxHP, hp, rewGold, modAt, modInMoves, enemType, buffSp;
+	int minNDMG;
+	int minHDMG;
+	int spValue;
+};
+
+class Zombie : public Enemy
+{
+public:
+	Zombie(unsigned short);
+	void Attack(ROB**, Hero**) override;
+	void HeavyAttack(ROB**, Hero**) override;
+	void Special(ROB**) override;
+};
+
+class Rogue : public Enemy
+{
+public:
+	Rogue(unsigned short);
+	void Attack(ROB**, Hero**) override;
+	void HeavyAttack(ROB**, Hero**) override;
+	void Special(ROB**) override;
 };

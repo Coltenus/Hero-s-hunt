@@ -21,11 +21,22 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf, Audi
 	r->isActive = false;
 	Enemy* en;
 	en = NULL;
-	if((*sv)->enemyStats.enType == 0) (*sv)->enemyStats.enType = rand() % 100 + 1;
+	if((*sv)->enemyStats.enType == 0) (*sv)->enemyStats.enType = rand() % 2 + 1;
 	else
 	{
 		isNewRoom = false;
-		en = new Zombie(1);
+		switch ((*sv)->enemyStats.enType)
+		{
+		case 1:
+			en = new Zombie(1);
+			break;
+		case 2:
+			en = new Rogue(1);
+			break;
+		default:
+			en = new Zombie(1);
+			break;
+		}
 		en->hp = (*sv)->enemyStats.hp;
 		en->maxHP = (*sv)->enemyStats.maxHP;
 		en->minNDMG = (*sv)->enemyStats.dmgN;
@@ -35,7 +46,21 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf, Audi
 		en->spValue = (*sv)->enemyStats.spV;
 		en->modInMoves = (*sv)->enemyStats.modIM;
 	}
-	if (isNewRoom && (*sv)->enemyStats.enType >= 1 && (*sv)->enemyStats.enType <= 100 && (*sv)->roomNum != 15) en = new Zombie((*sv)->roomNum);
+	if (isNewRoom && (*sv)->roomNum != 15)
+	{
+		switch ((*sv)->enemyStats.enType)
+		{
+		case 1:
+			en = new Zombie((*sv)->roomNum);
+			break;
+		case 2:
+			en = new Rogue((*sv)->roomNum);
+			break;
+		default:
+			en = new Zombie((*sv)->roomNum);
+			break;
+		}
+	}
 	if (isNewRoom && (*sv)->roomType == 0) (*sv)->roomType = rand() % 100 + 1;
 	while (!IsKeyPressed(KEY_SPACE) && !IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !(*shouldExit))
 	{
@@ -54,7 +79,18 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf, Audi
 		else if ((*sv)->roomType >= 1 && (*sv)->roomType <= 60)
 		{
 			DrawText("Battle against", WIDTH / 2 - 75, HEIGHT / 2 - 50, 30, BLACK);
-			if((*sv)->enemyStats.enType >= 1 && (*sv)->enemyStats.enType <= 100) DrawText("Zombie", WIDTH / 2 - 20, HEIGHT / 2, 30, BLACK);
+			switch ((*sv)->enemyStats.enType)
+			{
+			case 1:
+				DrawText("Zombie", WIDTH / 2 - 20, HEIGHT / 2, 30, BLACK);
+				break;
+			case 2:
+				DrawText("Rogue", WIDTH / 2 - 20, HEIGHT / 2, 30, BLACK);
+				break;
+			default:
+				DrawText("Enemy", WIDTH / 2 - 20, HEIGHT / 2, 30, BLACK);
+				break;
+			}
 		}
 		else if((*sv)->roomType >= 61 && (*sv)->roomType <= 80) DrawText("Shop", WIDTH / 2 - 20, HEIGHT / 2 - 50, 30, BLACK);
 		else DrawText("Rest room", WIDTH / 2 - 50, HEIGHT / 2 - 50, 30, BLACK);
@@ -74,9 +110,20 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf, Audi
 	if ((*sv)->roomType >= 1 && (*sv)->roomType <= 60 && !(*shouldExit)) *shouldExit = Battle(h, &en, &r, sv, inf, st, false, a2);
 	else if((*sv)->roomType >= 61 && (*sv)->roomType <= 80 && !(*shouldExit)) *shouldExit = Shop(h, sv, st, inf, a2);
 	else if((*sv)->roomType >= 81 && (*sv)->roomType <= 100 && !(*shouldExit)) *shouldExit = RestRoom(h, sv, st, inf, a2);
-	if (en->enemType == 1)
+	if (en->enemType != 0)
 	{
-		enemyTexture = LoadTexture("src/Zombie.png");
+		switch ((*sv)->enemyStats.enType)
+		{
+		case 1:
+			enemyTexture = LoadTexture("src/Zombie.png");
+			break;
+		case 2:
+			enemyTexture = LoadTexture("src/Zombie.png");
+			break;
+		default:
+			enemyTexture = LoadTexture("src/Zombie.png");
+			break;
+		}
 		frameRec = { (float)enemyTexture.width / 4 * 3, 0, (float)enemyTexture.width / 4, (float)enemyTexture.height };
 	}
 	if (r->isActive)

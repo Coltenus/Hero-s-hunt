@@ -19,8 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="include\abilities.cpp" />
     <ClCompile Include="include\audio.cpp" />
-    <ClCompile Include="include\characters.cpp" />
+    <ClCompile Include="include\items.cpp" />
+    <ClCompile Include="include\npcs.cpp" />
+    <ClCompile Include="include\pcs.cpp" />
     <ClCompile Include="include\chooseRoom.cpp" />
     <ClCompile Include="include\info.cpp" />
     <ClCompile Include="include\rooms.cpp" />
@@ -42,6 +45,7 @@
     <ClInclude Include="include\chooseRoom.h" />
     <ClInclude Include="include\common.h" />
     <ClInclude Include="include\info.h" />
+    <ClInclude Include="include\items.h" />
     <ClInclude Include="include\rooms.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

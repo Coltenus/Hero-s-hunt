@@ -1,10 +1,6 @@
 new monsters
 next floor(new bg, new monsters)
 
-shopkeeper animation
+shopkeeper's animation
 icons of battle values
-
-new enemy Rogue:
-knife swing(normal attack)
-fast attack(more accurate attack with less dmg)
-
+enemy Rogue's animation

@@ -18,7 +18,7 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="include\characters.cpp">
+    <ClCompile Include="include\pcs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="include\chooseRoom.cpp">
@@ -31,6 +31,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="include\audio.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\npcs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\items.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\abilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -73,6 +82,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\audio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\items.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

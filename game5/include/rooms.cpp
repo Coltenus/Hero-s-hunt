@@ -31,9 +31,20 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 	frameCounter = 0;
 	frameSpeed = 3;
 	currentFrame = 0;
-	if ((*en)->enemType == 1)
+	if ((*en)->enemType != 0)
 	{
-		enemyTexture = LoadTexture("src/Zombie.png");
+		switch ((*en)->enemType)
+		{
+		case 1:
+			enemyTexture = LoadTexture("src/Zombie.png");
+			break;
+		case 2:
+			enemyTexture = LoadTexture("src/Zombie.png");
+			break;
+		default:
+			enemyTexture = LoadTexture("src/Zombie.png");
+			break;
+		}
 		frameRec = { 0, 0, (float)enemyTexture.width / 4, (float)enemyTexture.height };
 	}
 	bg = LoadTexture("src/bg.png");
@@ -194,7 +205,8 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 				if (res->hp < 0) DrawText(TextFormat("%d", -(res->hp)), 600, HEIGHT / 2 + 100, 24, GREEN);
 				else if (res->hp > 0) DrawText(TextFormat("%d", -(res->hp)), 600, HEIGHT / 2 + 100, 24, RED);
 
-				if(res->block != 0) DrawText(TextFormat("%d", res->block), 600, HEIGHT / 2 + 140, 24, GREEN);
+				if(res->block > 0) DrawText(TextFormat("%d", res->block), 600, HEIGHT / 2 + 140, 24, GREEN);
+				else if (res->block < 0) DrawText(TextFormat("%d", res->block), 600, HEIGHT / 2 + 140, 24, RED);
 
 				if(res->bDur != 0) DrawText(TextFormat("%d", res->bDur), 600, HEIGHT / 2 + 340, 24, GREEN);
 
@@ -209,7 +221,18 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			}
 
 			if(isBoss) DrawText("Boss", 1050, HEIGHT / 2 + 20, 24, WHITE);
-			else DrawText("Enemy", 1050, HEIGHT / 2 + 20, 24, WHITE);
+			switch ((*en)->enemType)
+			{
+			case 1:
+				DrawText("Zombie", 1050, HEIGHT / 2 + 20, 24, WHITE);
+				break;
+			case 2:
+				DrawText("Rogue", 1050, HEIGHT / 2 + 20, 24, WHITE);
+				break;
+			default:
+				DrawText("Enemy", 1050, HEIGHT / 2 + 20, 24, WHITE);
+				break;
+			}
 			DrawText(TextFormat("HP: %d/%d", (*en)->hp, (*en)->maxHP), 1050, HEIGHT / 2 + 60, 24, WHITE);
 			DrawText(TextFormat("Normal attack damage: %d", (*en)->minNDMG), 1050, HEIGHT / 2 + 100, 24, WHITE);
 			DrawText(TextFormat("Heavy attack damage: %d", (*en)->minHDMG), 1050, HEIGHT / 2 + 140, 24, WHITE);
@@ -219,7 +242,7 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 
 			DrawText(TextFormat("Room %d%", (*sv)->roomNum), 20, 20, 30, WHITE);
 
-			if ((*en)->enemType == 1) DrawTextureRec(enemyTexture, frameRec, { WIDTH / 2 - 90, HEIGHT / 4 - 210 }, WHITE);
+			DrawTextureRec(enemyTexture, frameRec, { WIDTH / 2 - 90, HEIGHT / 4 - 210 }, WHITE);
 
 			DrawRectangleLines(650, HEIGHT / 2 + 315, 200, 70, WHITE);
 			DrawRectangleLines(900, HEIGHT / 2 + 315, 200, 70, WHITE);

@@ -5,7 +5,6 @@ class Audio
 {
 private:
 	Music ms;
-	bool isMuted;
 public:
 	Audio();
 	Audio(char**);
