@@ -3,4 +3,3 @@ next floor(new bg, new monsters)
 
 shopkeeper's animation
 icons of battle values
-enemy Rogue's animation

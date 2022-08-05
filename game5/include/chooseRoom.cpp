@@ -118,7 +118,7 @@ bool NextRoom(Hero** h, Save** sv, double* st, bool* shouldExit, Info* inf, Audi
 			enemyTexture = LoadTexture("src/Zombie.png");
 			break;
 		case 2:
-			enemyTexture = LoadTexture("src/Zombie.png");
+			enemyTexture = LoadTexture("src/Rogue.png");
 			break;
 		default:
 			enemyTexture = LoadTexture("src/Zombie.png");

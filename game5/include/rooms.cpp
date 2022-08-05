@@ -39,7 +39,7 @@ bool Battle(Hero** h, Enemy** en, Rewards** r, Save** sv, Info* inf, double* st,
 			enemyTexture = LoadTexture("src/Zombie.png");
 			break;
 		case 2:
-			enemyTexture = LoadTexture("src/Zombie.png");
+			enemyTexture = LoadTexture("src/Rogue.png");
 			break;
 		default:
 			enemyTexture = LoadTexture("src/Zombie.png");
