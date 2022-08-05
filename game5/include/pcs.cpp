@@ -72,8 +72,8 @@ Swordsman::Swordsman() : Hero()
 	hA = new char*[12];
 	*hA = (char*)"Sword swing";
 	spValue = 15;
-	sp = new char*[7];
-	*sp = (char*)"Shield";
+	sp = new char*[6];
+	*sp = (char*)"Block";
 	maxHP = 100;
 	hp = 100;
 	gold = 0;
