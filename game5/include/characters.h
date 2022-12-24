@@ -14,7 +14,7 @@ public:
 	char** abTitle;
 public:
 	Ability();
-	virtual ~Ability();
+	virtual ~Ability() = 0;
 public:
 	virtual void activate(Hero**, Enemy**, ROB**) = 0;
 };

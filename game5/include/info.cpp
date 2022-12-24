@@ -1,5 +1,5 @@
 #include "info.h"
-#include "raylib.hpp"
+#include "raylib.h"
 
 bool OpenInfo(Info* i, Save** sv, double* st, Audio* a2)
 {

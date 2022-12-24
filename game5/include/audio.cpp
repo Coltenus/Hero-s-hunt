@@ -1,9 +1,5 @@
 #include "audio.h"
 
-Audio::Audio()
-{
-}
-
 Audio::Audio(char** path)
 {
 	ms = LoadMusicStream(*path);

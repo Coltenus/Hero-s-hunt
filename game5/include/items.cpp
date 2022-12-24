@@ -1,6 +1,7 @@
 #include "items.h"
 #include "characters.h"
 #include <iostream>
+#include <string.h>
 
 Item::Item()
 {
