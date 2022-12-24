@@ -1,6 +1,6 @@
 #include "chooseRoom.h"
 #include <iostream>
-#include <raylib.hpp>
+#include <raylib.h>
 #include "rooms.h"
 #include "info.h"
 

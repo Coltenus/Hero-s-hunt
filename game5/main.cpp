@@ -1,11 +1,7 @@
-#define _CRT_SECURE_NO_WARNINGS
-#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #include <iostream>
-#include <raylib.hpp>
-#include <time.h>
+#include <raylib.h>
+#include <ctime>
 using namespace std;
-
-#define DEBUG
 
 #include "include/common.h"
 #include "include/characters.h"
@@ -40,7 +36,6 @@ int main(int argc, char** argv)
 		srand((unsigned)time(NULL));
 		int curSave = 0;
 		int sel = 0;
-		double st = -1;
 		Info* inf;
 		FILE* sv = fopen("saves/info", "rb");
 		if (sv == NULL)
@@ -164,7 +159,7 @@ void EnterUsername(Info** inf, bool* shouldExit)
 		while (!(*shouldExit))
 		{
 			key = GetCharPressed();
-			if ((key >= 97 && key <= 122 || key >= 65 && key <= 90 || key >= 48 && key <= 57 || key == 45 || key == 95 || key == 39) && i < 19)
+			if (((key >= 97 && key <= 122) || (key >= 65 && key <= 90) || (key >= 48 && key <= 57) || key == 45 || key == 95 || key == 39) && i < 19)
 			{
 				buf[i] = (char)key;
 				i++;
@@ -340,7 +335,7 @@ void GameProcess(Info** i, int sv, bool* shouldExit, Hero* (*selH)(short*, bool*
 	static FILE* f;
 	static Hero* h;
 	static Enemy* en;
-	static short chooseH, room;
+	static short chooseH;
 	static Audio a2;
 	char** buf = new char* [15];
 	*buf = (char*)"src/sound1.mp3";
@@ -572,7 +567,7 @@ void GameProcess(Info** i, int sv, bool* shouldExit, Hero* (*selH)(short*, bool*
 		if (WindowShouldClose()) *shouldExit = true;
 	}
 	f = fopen(*buf, "rb+");
-	if (h != nullptr && (h->hp <= 0 || save->roomNum == 10 && h->hp > 0))
+	if (h != nullptr && (h->hp <= 0 || (save->roomNum == 10 && h->hp > 0)))
 	{
 		save->minutes = 0;
 		save->hours = 0;
@@ -677,13 +672,13 @@ Hero* SelectHero(short* sel, bool* shouldExit)
 			&& mPos.y >= HEIGHT / 2 - 20 && mPos.y <= HEIGHT / 2 + 60) *sel = 2;
 		if (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
 			&& mPos.y >= HEIGHT / 2 + 160 && mPos.y <= HEIGHT / 2 + 240) *sel = 3;
-		if (IsKeyPressed(KEY_ENTER) && *sel >= 1 && *sel <= 3 || IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
-			(mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
-				&& mPos.y >= HEIGHT / 2 - 200 && mPos.y <= HEIGHT / 2 - 120
-				|| mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
-				&& mPos.y >= HEIGHT / 2 - 20 && mPos.y <= HEIGHT / 2 + 60
-				|| mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
-				&& mPos.y >= HEIGHT / 2 + 160 && mPos.y <= HEIGHT / 2 + 240))
+		if ((IsKeyPressed(KEY_ENTER) && *sel >= 1 && *sel <= 3) || (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+			((mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+				&& mPos.y >= HEIGHT / 2 - 200 && mPos.y <= HEIGHT / 2 - 120)
+				|| (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+				&& mPos.y >= HEIGHT / 2 - 20 && mPos.y <= HEIGHT / 2 + 60)
+				|| (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+				&& mPos.y >= HEIGHT / 2 + 160 && mPos.y <= HEIGHT / 2 + 240))))
 			confirm = true;
 		BeginDrawing();
 		switch (*sel)
@@ -790,13 +785,13 @@ Ability* SelectAbility(short h, bool* shouldExit)
 			&& mPos.y >= HEIGHT / 2 + 80 && mPos.y <= HEIGHT / 2 + 140) sel = 2;
 		if (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
 			&& mPos.y >= HEIGHT / 2 + 260 && mPos.y <= HEIGHT / 2 + 340) sel = 3;
-		if (IsKeyPressed(KEY_ENTER) && sel >= 1 && sel <= 3 || IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
-			(mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
-				&& mPos.y >= HEIGHT / 2 - 100 && mPos.y <= HEIGHT / 2 - 20
-				|| mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
-				&& mPos.y >= HEIGHT / 2 + 80 && mPos.y <= HEIGHT / 2 + 140
-				|| mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
-				&& mPos.y >= HEIGHT / 2 + 260 && mPos.y <= HEIGHT / 2 + 340)) 
+		if ((IsKeyPressed(KEY_ENTER) && sel >= 1 && sel <= 3) || (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+			((mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+				&& mPos.y >= HEIGHT / 2 - 100 && mPos.y <= HEIGHT / 2 - 20)
+				|| (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+				&& mPos.y >= HEIGHT / 2 + 80 && mPos.y <= HEIGHT / 2 + 140)
+				|| (mPos.x >= WIDTH / 2 - 150 && mPos.x <= WIDTH / 2 + 150
+				&& mPos.y >= HEIGHT / 2 + 260 && mPos.y <= HEIGHT / 2 + 340))))
 				confirm = true;
 		BeginDrawing();
 		switch (sel)
