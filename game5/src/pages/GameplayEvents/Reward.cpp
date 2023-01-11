@@ -135,10 +135,10 @@ void Reward::Draw() {
     DrawRectangle(20, HEIGHT / 2, WIDTH - 40, HEIGHT / 2 - 20, Color{0, 0, 0, 150});
     DrawRectangleLines(20, HEIGHT / 2, WIDTH - 40, HEIGHT / 2 - 20, textCol);
 
-    DrawTextureRec(enemyTexture, frameRec, { WIDTH / 2 - 75, HEIGHT / 2 - 450 }, textCol);
+    DrawTextureRec(enemyTexture, frameRec, { WIDTH / 2 - 75, HEIGHT / 2 - 450 }, WHITE);
     DrawText(TextFormat("Room %hu", roomCount), WIDTH / 2 - 25, HEIGHT / 2 + 50, 30, textCol);
     DrawText(TextFormat("+%hu gold", rewardStats.gold), WIDTH / 2 - 25, HEIGHT / 2 + 200, 30, textCol);
-    DrawText(TextFormat("+%hu hp", rewardStats.hp), 100, HEIGHT / 2 + 300, 24, WHITE);
+    DrawText(TextFormat("+%hu hp", rewardStats.hp), 100, HEIGHT / 2 + 300, 24, textCol);
     DrawText(TextFormat("+%hu min normal DMG", rewardStats.nDMG), 400, HEIGHT / 2 + 300, 24, textCol);
     DrawText(TextFormat("+%hu min heavy DMG", rewardStats.hDMG), 700, HEIGHT / 2 + 300, 24, textCol);
     DrawText(TextFormat("+%hu special value", rewardStats.spVal), 1000, HEIGHT / 2 + 300, 24, textCol);
