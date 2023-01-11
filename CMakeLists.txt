@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
-project(Hero-s-hunt)
+project(game5)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -11,31 +11,107 @@ if (DEBUG)
 endif(DEBUG)
 
 set(PROJECT_HEADERS
-        game5/include/audio.h
-        game5/include/characters.h
-        game5/include/chooseRoom.h
-        game5/include/common.h
-        game5/include/info.h
-        game5/include/items.h
-        game5/include/rooms.h
+        game5/src/common.h
+        game5/src/characters/enemies/Rogue.h
+        game5/main.cpp game5/src/characters/heroes.h
+        game5/src/characters/abilities.h
+        game5/src/characters/items.h
+        game5/src/characters/enemies.h
+        game5/src/characters/abilities/sw_abilities.h
+        game5/src/characters/abilities/ar_abilities.h
+        game5/src/characters/abilities/pal_abilities.h
+        game5/src/pages/GameplayEvents/gameplay_events.h
+        game5/src/pages.h
+        game5/src/characters/heroes/Hero.h
+        game5/src/characters/abilities/Ability.h
+        game5/src/characters/items/Item.h
+        game5/src/utils/Audio.h
+        game5/src/pages/Page.h
+        game5/src/characters/enemies/Enemy.h
+        game5/src/pages/Gameplay.h
+        game5/src/characters/items/Healing.h
+        game5/src/characters/items/Block.h
+        game5/src/characters/items/DmgPotion.h
+        game5/src/characters/items/UpMaxHP.h
+        game5/src/characters/abilities/Swordsman/SwAb1.h
+        game5/src/characters/abilities/Swordsman/SwAb2.h
+        game5/src/characters/abilities/Swordsman/SwAb3.h
+        game5/src/characters/abilities/Archer/ArAb1.h
+        game5/src/characters/abilities/Archer/ArAb2.h
+        game5/src/characters/abilities/Archer/ArAb3.h
+        game5/src/characters/abilities/Paladin/PalAb1.h
+        game5/src/characters/abilities/Paladin/PalAb2.h
+        game5/src/characters/abilities/Paladin/PalAb3.h
+        game5/src/characters/heroes/Swordsman.h
+        game5/src/characters/heroes/Archer.h
+        game5/src/characters/heroes/Paladin.h
+        game5/src/characters/enemies/Zombie.h
+        game5/src/pages/GameplayEvents/GameplayEvent.h
+        game5/src/pages/GameplayEvents/Battle.h
+        game5/src/utils/Button.h
+        game5/src/pages/GameplayEvents/ChooseStart.h
+        game5/src/pages/GameplayEvents/Transition.h
+        game5/src/pages/GameplayEvents/Reward.h
+        game5/src/pages/GameplayEvents/DeadScreen.h
+        game5/src/pages/GameplayEvents/Shop.h
+        game5/src/pages/GameplayEvents/Rest.h
+        game5/src/pages/MainMenu.h
+        game5/src/pages/Settings.h
+        game5/src/pages/Credits.h
+        game5/src/pages/ChooseSave.h
+        game5/src/utils/Save.h
+        game5/src/utils/TextFrame.h
+        game5/src/utils/RadioButton.h
         )
 set(PROJECT_SOURCES
-        game5/main.cpp
-        game5/include/audio.cpp
-        game5/include/abilities.cpp
-        game5/include/chooseRoom.cpp
-        game5/include/info.cpp
-        game5/include/items.cpp
-        game5/include/npcs.cpp
-        game5/include/pcs.cpp
-        game5/include/rooms.cpp
+        game5/src/characters/enemies/Rogue.cpp
+        game5/src/characters/heroes/Hero.cpp
+        game5/src/characters/abilities/Ability.cpp
+        game5/src/characters/items/Item.cpp
+        game5/src/utils/Audio.cpp
+        game5/src/pages/Page.cpp
+        game5/src/characters/enemies/Enemy.cpp
+        game5/src/pages/Gameplay.cpp
+        game5/src/characters/items/Healing.cpp
+        game5/src/characters/items/Block.cpp
+        game5/src/characters/items/DmgPotion.cpp
+        game5/src/characters/items/UpMaxHP.cpp
+        game5/src/characters/abilities/Swordsman/SwAb1.cpp
+        game5/src/characters/abilities/Swordsman/SwAb2.cpp
+        game5/src/characters/abilities/Swordsman/SwAb3.cpp
+        game5/src/characters/abilities/Archer/ArAb1.cpp
+        game5/src/characters/abilities/Archer/ArAb2.cpp
+        game5/src/characters/abilities/Archer/ArAb3.cpp
+        game5/src/characters/abilities/Paladin/PalAb1.cpp
+        game5/src/characters/abilities/Paladin/PalAb2.cpp
+        game5/src/characters/abilities/Paladin/PalAb3.cpp
+        game5/src/characters/heroes/Swordsman.cpp
+        game5/src/characters/heroes/Archer.cpp
+        game5/src/characters/heroes/Paladin.cpp
+        game5/src/characters/enemies/Zombie.cpp
+        game5/src/pages/GameplayEvents/GameplayEvent.cpp
+        game5/src/pages/GameplayEvents/Battle.cpp
+        game5/src/utils/Button.cpp
+        game5/src/pages/GameplayEvents/ChooseStart.cpp
+        game5/src/pages/GameplayEvents/Transition.cpp
+        game5/src/pages/GameplayEvents/Reward.cpp
+        game5/src/pages/GameplayEvents/DeadScreen.cpp
+        game5/src/pages/GameplayEvents/Shop.cpp
+        game5/src/pages/GameplayEvents/Rest.cpp
+        game5/src/pages/MainMenu.cpp
+        game5/src/pages/Settings.cpp
+        game5/src/pages/Credits.cpp
+        game5/src/pages/ChooseSave.cpp
+        game5/src/utils/Save.cpp
+        game5/src/utils/TextFrame.cpp
+        game5/src/utils/RadioButton.cpp
         )
 
-add_executable(Hero-s-hunt ${PROJECT_SOURCES} ${PROJECT_HEADERS})
+add_executable(game5 ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 
 find_package(raylib CONFIG REQUIRED)
-target_include_directories(Hero-s-hunt PRIVATE ${raylib_INCLUDE_DIRS})
-target_link_libraries(Hero-s-hunt PRIVATE ${raylib_LIBRARIES})
+target_include_directories(game5 PRIVATE ${raylib_INCLUDE_DIRS})
+target_link_libraries(game5 PRIVATE ${raylib_LIBRARIES})
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     add_definitions(-DDEBUG=1)
